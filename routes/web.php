@@ -27,6 +27,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/wisata-per-bulan', [DashboardController::class, 'getWisataPerBulan'])->name('dashboard.wisata-per-bulan');
 
     // Wisata Management
     Route::prefix('datawisata')->name('datawisata.')->group(function () {
