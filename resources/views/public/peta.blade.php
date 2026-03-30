@@ -17,6 +17,7 @@
                 <input type="text" id="searchInput"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
                     placeholder="Nama wisata...">
+                <p class="text-sm text-gray-600 mt-3"><span id="wisataCount">{{ count($wisata) }}</span> wisata ditemukan</p>
             </div>
 
             <!-- Mode Map -->
@@ -154,6 +155,45 @@
 
                 <hr class="my-4">
 
+                <div id="normalLegend">
+                    <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Kategori Wisata</p>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #22c55e;"></div>
+                            <span>Wisata Alam</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #0ea5e9;"></div>
+                            <span>Wisata Bahari</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #3b82f6;"></div>
+                            <span>Wisata Buatan</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #ef4444;"></div>
+                            <span>Cagar Budaya</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #ec4899;"></div>
+                            <span>Wisata Belanja</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #f59e0b;"></div>
+                            <span>Wisata Heritage</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #8b5cf6;"></div>
+                            <span>Wisata Sejarah</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-5 h-5 rounded mr-2" style="background-color: #a855f7;"></div>
+                            <span>Wisata Budaya</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4">
 
                 <div id="heatLegend" class="hidden">
                     <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Heatmap Kunjungan (Terang ke Gelap)</p>
