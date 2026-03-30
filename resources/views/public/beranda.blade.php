@@ -78,6 +78,70 @@
     </div>
 </section>
 
+<!-- Most View Section -->
+<section class="py-16 bg-gray-50 border-y border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Most View Wisata</h2>
+                <p class="text-gray-600 mt-2">Berdasarkan jumlah klik detail wisata yang tercatat pada sistem admin.</p>
+            </div>
+            <span class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-100 text-blue-700 text-sm font-semibold w-fit">
+                <i class="fas fa-chart-line mr-2"></i>Update otomatis dari data kunjungan
+            </span>
+        </div>
+
+        @php
+            $topVisited = $mostViewedWisata->filter(fn($item) => (int) $item->visits > 0);
+        @endphp
+
+        @if($topVisited->isEmpty())
+            <div class="bg-white rounded-xl border border-dashed border-gray-300 p-8 text-center">
+                <i class="fas fa-chart-bar text-4xl text-gray-300 mb-4"></i>
+                <p class="text-gray-600">Belum ada data kunjungan untuk ditampilkan sebagai Most View.</p>
+            </div>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($topVisited as $rank => $item)
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition group">
+                        <div class="relative h-44 overflow-hidden bg-gray-200 flex items-center justify-center">
+                            @if($item->gambar)
+                                <img src="{{ Storage::url($item->gambar) }}" alt="{{ $item->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            @else
+                                <i class="fas fa-image text-gray-400 text-4xl"></i>
+                            @endif
+                            <div class="absolute top-3 left-3 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-md">
+                                #{{ $rank + 1 }}
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <div class="flex items-start justify-between gap-3 mb-2">
+                                <h3 class="text-lg font-semibold text-gray-800">{{ $item->nama }}</h3>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded whitespace-nowrap">
+                                    {{ $item->kategori }}
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mb-4">
+                                <i class="fas fa-map-marker-alt mr-2"></i>{{ $item->alamat }}
+                            </p>
+
+                            <div class="flex items-center justify-between border-t pt-4">
+                                <span class="text-sm font-semibold text-gray-700">
+                                    <i class="fas fa-eye text-blue-600 mr-2"></i>{{ number_format($item->visits) }} kali dilihat
+                                </span>
+                                <a href="{{ route('detail', $item->id) }}" class="text-sm font-semibold text-blue-600 hover:text-blue-700">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+</section>
+
 <!-- Wisata List Section -->
 <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

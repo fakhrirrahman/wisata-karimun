@@ -14,7 +14,13 @@ class PublicWisataController extends Controller
             ->orderBy('created_at', 'asc')
             ->get();
 
-        return view('public.beranda', compact('wisata'));
+        $mostViewedWisata = Wisata::select('id', 'nama', 'alamat', 'kategori', 'gambar', 'visits')
+            ->orderByDesc('visits')
+            ->orderBy('nama', 'asc')
+            ->limit(6)
+            ->get();
+
+        return view('public.beranda', compact('wisata', 'mostViewedWisata'));
     }
 
     public function detail($id)
