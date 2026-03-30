@@ -47,20 +47,32 @@
                         <span class="ml-2 text-gray-700">🌿 Wisata Alam</span>
                     </label>
                     <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Budaya" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🏛️ Wisata Budaya</span>
+                        <input type="radio" name="category" value="Wisata Bahari" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">🌊 Wisata Bahari</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Buatan" class="h-4 w-4 text-blue-600">
                         <span class="ml-2 text-gray-700">🎢 Wisata Buatan</span>
                     </label>
                     <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Kuliner" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🍽️ Wisata Kuliner</span>
+                        <input type="radio" name="category" value="Cagar Budaya" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">🏛️ Cagar Budaya</span>
                     </label>
                     <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Kerajinan" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🎨 Wisata Kerajinan</span>
+                        <input type="radio" name="category" value="Wisata Belanja" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">🛍️ Wisata Belanja</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="category" value="Wisata Heritage" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">🏰 Wisata Heritage</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="category" value="Wisata Sejarah" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">📜 Wisata Sejarah</span>
+                    </label>
+                    <label class="flex items-center">
+                        <input type="radio" name="category" value="Wisata Budaya" class="h-4 w-4 text-blue-600">
+                        <span class="ml-2 text-gray-700">🎭 Wisata Budaya</span>
                     </label>
                 </div>
             </div>
@@ -96,33 +108,6 @@
                 </div>
             </div>
 
-            <!-- Hasil Pencarian / Daftar Wisata -->
-            <div class="p-6 border-t bg-gray-50 max-h-80 overflow-y-auto">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">
-                    Hasil Pencarian
-                    <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full ml-2"
-                        id="wisataCount">
-                        {{ count($wisata) }}
-                    </span>
-                </h3>
-                <div id="wisataList" class="space-y-2">
-                    @forelse($wisata as $item)
-                        <div class="wisata-item p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition bg-white wisata-{{ strtolower(str_replace(' ', '-', $item->kategori ?? '')) }} wisata-{{ strtolower(str_replace(' ', '-', $item->kecamatan ?? '')) }}"
-                            data-wisata-id="{{ $item->id }}" data-wisata-category="{{ $item->kategori }}"
-                            data-wisata-kecamatan="{{ $item->kecamatan }}">
-                            <p class="text-sm font-semibold text-gray-800">{{ $item->nama }}</p>
-                            <p class="text-xs text-gray-500 mt-1">📍 {{ $item->kecamatan ?? 'N/A' }}</p>
-                            <p class="text-xs text-gray-600 mt-1">
-                                <span class="inline-block bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">
-                                    {{ $item->kategori }}
-                                </span>
-                            </p>
-                        </div>
-                    @empty
-                        <p class="text-gray-500 text-sm text-center py-4">Tidak ada data wisata</p>
-                    @endforelse
-                </div>
-            </div>
 
             <!-- Legend -->
             <div class="p-6 bg-gray-50 border-t">
@@ -169,31 +154,6 @@
 
                 <hr class="my-4">
 
-                <div id="normalLegend">
-                    <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Kategori Wisata (Marker)</p>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
-                            <span>Wisata Alam</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
-                            <span>Wisata Budaya</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
-                            <span>Wisata Buatan</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full bg-yellow-500 mr-2"></div>
-                            <span>Wisata Kuliner</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 rounded-full bg-purple-500 mr-2"></div>
-                            <span>Wisata Kerajinan</span>
-                        </div>
-                    </div>
-                </div>
 
                 <div id="heatLegend" class="hidden">
                     <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Heatmap Kunjungan (Terang ke Gelap)</p>
@@ -277,10 +237,13 @@
 
             const categoryColor = {
                 'Wisata Alam': '#22c55e',
-                'Wisata Budaya': '#ef4444',
+                'Wisata Bahari': '#0ea5e9',
                 'Wisata Buatan': '#3b82f6',
-                'Wisata Kuliner': '#f59e0b',
-                'Wisata Kerajinan': '#a855f7'
+                'Cagar Budaya': '#ef4444',
+                'Wisata Belanja': '#ec4899',
+                'Wisata Heritage': '#f59e0b',
+                'Wisata Sejarah': '#8b5cf6',
+                'Wisata Budaya': '#a855f7'
             };
 
             function canonical(name) {
