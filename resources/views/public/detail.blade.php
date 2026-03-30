@@ -52,19 +52,8 @@
                         <p class="text-gray-700 leading-relaxed">{{ $wisata->deskripsi }}</p>
                     </div>
 
-                    <!-- Info Penting -->
-                    <div class="grid grid-cols-2 gap-6 mb-8">
-                        <div class="bg-blue-50 rounded-lg p-6">
-                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Harga Tiket</p>
-                            <p class="text-2xl font-bold text-blue-600">
-                                @if ($wisata->harga)
-                                    Rp{{ number_format($wisata->harga, 0, ',', '.') }}
-                                @else
-                                    <span class="text-green-600">Gratis</span>
-                                @endif
-                            </p>
-                        </div>
-
+                    <!-- Info Lokasi -->
+                    <div class="mb-8">
                         <div class="bg-green-50 rounded-lg p-6">
                             <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Koordinat</p>
                             <p class="text-sm text-gray-800">
@@ -134,13 +123,13 @@
                         <div id="nearbyQuickLinks" class="hidden rounded-lg bg-amber-50 border border-amber-100 p-4">
                             <p class="text-sm font-semibold text-amber-800 mb-3">Cek cepat via Google Maps</p>
                             <div class="grid grid-cols-1 gap-2 text-sm">
-                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/hotel/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/hotel/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z?entry=ttu" class="text-blue-700 hover:text-blue-800 font-semibold">
                                     <i class="fas fa-hotel mr-2"></i>Cari hotel terdekat
                                 </a>
-                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/restoran+atau+tempat+makan/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/restoran/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z?entry=ttu" class="text-blue-700 hover:text-blue-800 font-semibold">
                                     <i class="fas fa-utensils mr-2"></i>Cari tempat makan terdekat
                                 </a>
-                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/atm+bank+apotek/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/atm+bank+apotek/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z?entry=ttu" class="text-blue-700 hover:text-blue-800 font-semibold">
                                     <i class="fas fa-store mr-2"></i>Cari layanan terdekat
                                 </a>
                             </div>
@@ -157,21 +146,6 @@
                     </div>
                 </div>
 
-                <!-- Share Card -->
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Bagikan</h3>
-                    <div class="space-y-2">
-                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request()->url() }}" target="_blank"
-                            class="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg transition">
-                            <i class="fab fa-facebook mr-2"></i>Facebook
-                        </a>
-                        <a href="https://twitter.com/intent/tweet?url={{ request()->url() }}&text={{ $wisata->nama }}"
-                            target="_blank"
-                            class="block w-full bg-sky-500 hover:bg-sky-600 text-white text-center py-2 rounded-lg transition">
-                            <i class="fab fa-twitter mr-2"></i>Twitter
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -184,8 +158,11 @@
             const nearbyLoadingEl = document.getElementById('nearbyLoading');
             const nearbyEmptyEl = document.getElementById('nearbyEmpty');
             const nearbyQuickLinksEl = document.getElementById('nearbyQuickLinks');
+            const cacheKey = `nearby-${wisataLat.toFixed(4)}-${wisataLng.toFixed(4)}`;
 
             var map = L.map('map').setView([wisataLat, wisataLng], 14);
+            const nearbyLayer = L.layerGroup().addTo(map);
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
@@ -204,7 +181,7 @@
             };
 
             function detectCategory(tags) {
-                if (tags.tourism === 'hotel') return 'hotel';
+                if (tags.tourism === 'hotel' || tags.tourism === 'guest_house' || tags.tourism === 'motel') return 'hotel';
                 if (tags.amenity === 'restaurant' || tags.amenity === 'fast_food' || tags.amenity === 'food_court') return 'restaurant';
                 if (tags.amenity === 'cafe') return 'cafe';
                 if (['atm', 'bank', 'pharmacy', 'hospital', 'clinic', 'fuel', 'marketplace', 'supermarket'].includes(tags.amenity)) return 'service';
@@ -238,12 +215,21 @@
                     .replace(/'/g, '&#039;');
             }
 
+            function showEmptyState() {
+                nearbyListEl.innerHTML = '';
+                nearbyLayer.clearLayers();
+                nearbyLoadingEl.classList.add('hidden');
+                nearbyEmptyEl.classList.remove('hidden');
+                nearbyQuickLinksEl.classList.remove('hidden');
+            }
+
             function renderNearbyPlaces(places) {
                 nearbyLoadingEl.classList.add('hidden');
+                nearbyListEl.innerHTML = '';
+                nearbyLayer.clearLayers();
 
                 if (!places.length) {
-                    nearbyEmptyEl.classList.remove('hidden');
-                    nearbyQuickLinksEl.classList.remove('hidden');
+                    showEmptyState();
                     return;
                 }
 
@@ -274,27 +260,93 @@
                         fillColor: '#60a5fa',
                         fillOpacity: 0.8,
                         weight: 1
-                    }).addTo(map)
+                    }).addTo(nearbyLayer)
                     .bindPopup(`<b>${escapeHtml(place.name)}</b><br>${escapeHtml(config.label)} - ${formatDistance(place.distanceKm)}`);
                 });
             }
 
-            function fetchNearbyPlaces() {
-                const overpassQuery = `
-                    [out:json][timeout:25];
+            function parsePlaces(elements) {
+                const dedupe = new Set();
+
+                return elements
+                    .map((el) => {
+                        const tags = el.tags || {};
+                        const lat = el.lat || (el.center && el.center.lat);
+                        const lng = el.lon || (el.center && el.center.lon);
+                        const name = tags.name || tags.brand || tags.operator || `Lokasi ${detectCategory(tags)}`;
+
+                        if (!lat || !lng || !name) return null;
+
+                        const dedupeKey = `${name.toLowerCase()}-${lat.toFixed(5)}-${lng.toFixed(5)}`;
+                        if (dedupe.has(dedupeKey)) return null;
+                        dedupe.add(dedupeKey);
+
+                        return {
+                            name,
+                            lat,
+                            lng,
+                            category: detectCategory(tags),
+                            distanceKm: haversineKm(wisataLat, wisataLng, lat, lng)
+                        };
+                    })
+                    .filter(Boolean)
+                    .sort((a, b) => a.distanceKm - b.distanceKm)
+                    .slice(0, 8);
+            }
+
+            function readCache() {
+                try {
+                    const raw = localStorage.getItem(cacheKey);
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    const maxAgeMs = 1000 * 60 * 60 * 6;
+                    if (!parsed.time || !Array.isArray(parsed.places)) return null;
+                    if (Date.now() - parsed.time > maxAgeMs) return null;
+                    return parsed.places;
+                } catch (_) {
+                    return null;
+                }
+            }
+
+            function writeCache(places) {
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({
+                        time: Date.now(),
+                        places
+                    }));
+                } catch (_) {
+                    // Ignore cache write errors in private mode or quota limits.
+                }
+            }
+
+            function fetchWithTimeout(url, timeoutMs) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+                return fetch(url, { signal: controller.signal })
+                    .finally(() => clearTimeout(timer));
+            }
+
+            function buildOverpassQuery(radius, includeAreas) {
+                const wayAndRelation = includeAreas ? `
+                    way(around:${radius},${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                    way(around:${radius},${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                    relation(around:${radius},${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                    relation(around:${radius},${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                ` : '';
+
+                return `
+                    [out:json][timeout:8];
                     (
-                        node(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
-                        node(around:7000,${wisataLat},${wisataLng})["shop"~"hotel"];
-                        node(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
-                        way(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
-                        way(around:7000,${wisataLat},${wisataLng})["shop"~"hotel"];
-                        way(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
-                        relation(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
-                        relation(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                        node(around:${radius},${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                        node(around:${radius},${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                        ${wayAndRelation}
                     );
                     out center;
                 `;
+            }
 
+            function requestOverpass(query) {
                 const endpoints = [
                     'https://overpass-api.de/api/interpreter',
                     'https://overpass.kumi.systems/api/interpreter'
@@ -305,7 +357,7 @@
                         throw new Error('Semua endpoint Overpass gagal');
                     }
 
-                    return fetch(`${endpoints[index]}?data=${encodeURIComponent(overpassQuery)}`)
+                    return fetchWithTimeout(`${endpoints[index]}?data=${encodeURIComponent(query)}`, 5000)
                         .then((response) => {
                             if (!response.ok) {
                                 throw new Error(`HTTP ${response.status}`);
@@ -315,46 +367,56 @@
                         .catch(() => tryEndpoint(index + 1));
                 };
 
-                tryEndpoint(0)
-                    .then((data) => {
-                        const elements = (data && data.elements) ? data.elements : [];
-                        const dedupe = new Set();
+                return tryEndpoint(0);
+            }
 
-                        const places = elements
-                            .map((el) => {
-                                const tags = el.tags || {};
-                                const lat = el.lat || (el.center && el.center.lat);
-                                const lng = el.lon || (el.center && el.center.lon);
-                                const name = tags.name || tags.brand || tags.operator || `Lokasi ${detectCategory(tags)}`;
+            function fetchNearbyPlaces() {
+                const slowHintTimer = setTimeout(() => {
+                    if (!nearbyLoadingEl.classList.contains('hidden')) {
+                        nearbyQuickLinksEl.classList.remove('hidden');
+                    }
+                }, 2200);
 
-                                if (!lat || !lng || !name) return null;
+                const fastQuery = buildOverpassQuery(3000, false);
+                const fullQuery = buildOverpassQuery(7000, true);
 
-                                const dedupeKey = `${name.toLowerCase()}-${lat.toFixed(5)}-${lng.toFixed(5)}`;
-                                if (dedupe.has(dedupeKey)) return null;
-                                dedupe.add(dedupeKey);
+                requestOverpass(fastQuery)
+                    .then((fastData) => {
+                        const fastPlaces = parsePlaces((fastData && fastData.elements) ? fastData.elements : []);
 
-                                return {
-                                    name,
-                                    lat,
-                                    lng,
-                                    category: detectCategory(tags),
-                                    distanceKm: haversineKm(wisataLat, wisataLng, lat, lng)
-                                };
-                            })
-                            .filter(Boolean)
-                            .sort((a, b) => a.distanceKm - b.distanceKm)
-                            .slice(0, 8);
+                        if (fastPlaces.length >= 4) {
+                            writeCache(fastPlaces);
+                            clearTimeout(slowHintTimer);
+                            renderNearbyPlaces(fastPlaces);
+                            return;
+                        }
 
-                        renderNearbyPlaces(places);
+                        return requestOverpass(fullQuery)
+                            .then((fullData) => {
+                                const fullPlaces = parsePlaces((fullData && fullData.elements) ? fullData.elements : []);
+                                const merged = [...fastPlaces, ...fullPlaces]
+                                    .sort((a, b) => a.distanceKm - b.distanceKm)
+                                    .filter((place, idx, arr) => idx === arr.findIndex((p) => p.name === place.name && Math.abs(p.lat - place.lat) < 0.00001 && Math.abs(p.lng - place.lng) < 0.00001))
+                                    .slice(0, 8);
+
+                                writeCache(merged);
+                                clearTimeout(slowHintTimer);
+                                renderNearbyPlaces(merged);
+                            });
                     })
                     .catch(() => {
-                        nearbyLoadingEl.classList.add('hidden');
-                        nearbyEmptyEl.classList.remove('hidden');
-                        nearbyQuickLinksEl.classList.remove('hidden');
+                        clearTimeout(slowHintTimer);
+                        showEmptyState();
                     });
             }
 
-            fetchNearbyPlaces();
+            const cachedPlaces = readCache();
+            if (cachedPlaces && cachedPlaces.length) {
+                renderNearbyPlaces(cachedPlaces);
+                fetchNearbyPlaces();
+            } else {
+                fetchNearbyPlaces();
+            }
         });
     </script>
 @endsection
