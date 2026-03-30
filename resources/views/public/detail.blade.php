@@ -52,8 +52,19 @@
                         <p class="text-gray-700 leading-relaxed">{{ $wisata->deskripsi }}</p>
                     </div>
 
-                    <!-- Info Lokasi -->
-                    <div class="mb-8">
+                    <!-- Info Penting -->
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="bg-blue-50 rounded-lg p-6">
+                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Harga Tiket</p>
+                            <p class="text-2xl font-bold text-blue-600">
+                                @if ($wisata->harga)
+                                    Rp{{ number_format($wisata->harga, 0, ',', '.') }}
+                                @else
+                                    <span class="text-green-600">Gratis</span>
+                                @endif
+                            </p>
+                        </div>
+
                         <div class="bg-green-50 rounded-lg p-6">
                             <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Koordinat</p>
                             <p class="text-sm text-gray-800">
