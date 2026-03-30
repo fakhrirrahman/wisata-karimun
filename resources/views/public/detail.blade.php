@@ -117,36 +117,36 @@
 
             <!-- Sidebar -->
             <div class="col-span-1">
-                <!-- Info Card -->
+                <!-- Nearby Card -->
                 <div class="bg-white rounded-lg shadow-lg p-6 mb-6 sticky top-24">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6">Informasi Wisata</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Lokasi Terdekat</h3>
+                    <p class="text-sm text-gray-600 mb-6">Hotel, tempat makan, dan layanan sekitar lokasi wisata ini.</p>
 
-                    <div class="space-y-6">
-                        <div>
-                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Nama</p>
-                            <p class="text-gray-800">{{ $wisata->nama }}</p>
+                    <div class="space-y-4">
+                        <div id="nearbyLoading" class="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-700">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>Mencari lokasi terdekat...
                         </div>
 
-                        <div>
-                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Kategori</p>
-                            <p class="text-gray-800">{{ $wisata->kategori }}</p>
+                        <div id="nearbyEmpty" class="hidden rounded-lg bg-gray-50 border border-gray-200 p-4 text-sm text-gray-600">
+                            Belum ada data lokasi terdekat untuk ditampilkan saat ini.
                         </div>
 
-                        <div>
-                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Alamat</p>
-                            <p class="text-gray-800 text-sm">{{ $wisata->alamat }}</p>
+                        <div id="nearbyQuickLinks" class="hidden rounded-lg bg-amber-50 border border-amber-100 p-4">
+                            <p class="text-sm font-semibold text-amber-800 mb-3">Cek cepat via Google Maps</p>
+                            <div class="grid grid-cols-1 gap-2 text-sm">
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/hotel/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                    <i class="fas fa-hotel mr-2"></i>Cari hotel terdekat
+                                </a>
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/restoran+atau+tempat+makan/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                    <i class="fas fa-utensils mr-2"></i>Cari tempat makan terdekat
+                                </a>
+                                <a target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/atm+bank+apotek/@{{ $wisata->latitude }},{{ $wisata->longitude }},15z" class="text-blue-700 hover:text-blue-800 font-semibold">
+                                    <i class="fas fa-store mr-2"></i>Cari layanan terdekat
+                                </a>
+                            </div>
                         </div>
 
-                        <div>
-                            <p class="text-gray-600 text-sm uppercase font-semibold mb-2">Harga Tiket</p>
-                            <p class="text-2xl font-bold text-blue-600">
-                                @if ($wisata->harga)
-                                    Rp{{ number_format($wisata->harga, 0, ',', '.') }}
-                                @else
-                                    <span class="text-green-600">Gratis</span>
-                                @endif
-                            </p>
-                        </div>
+                        <div id="nearbyList" class="space-y-3"></div>
 
                         <hr>
 
@@ -178,15 +178,183 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var map = L.map('map').setView([{{ $wisata->latitude }}, {{ $wisata->longitude }}], 14);
+            const wisataLat = {{ $wisata->latitude }};
+            const wisataLng = {{ $wisata->longitude }};
+            const nearbyListEl = document.getElementById('nearbyList');
+            const nearbyLoadingEl = document.getElementById('nearbyLoading');
+            const nearbyEmptyEl = document.getElementById('nearbyEmpty');
+            const nearbyQuickLinksEl = document.getElementById('nearbyQuickLinks');
+
+            var map = L.map('map').setView([wisataLat, wisataLng], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
             }).addTo(map);
 
-            L.marker([{{ $wisata->latitude }}, {{ $wisata->longitude }}])
+            L.marker([wisataLat, wisataLng])
                 .addTo(map)
                 .bindPopup('<b>{{ $wisata->nama }}</b><br>{{ $wisata->kategori }}')
                 .openPopup();
+
+            const categoryConfig = {
+                hotel: { label: 'Hotel', icon: 'fa-hotel', color: 'text-indigo-600' },
+                restaurant: { label: 'Tempat Makan', icon: 'fa-utensils', color: 'text-orange-600' },
+                cafe: { label: 'Kafe', icon: 'fa-mug-hot', color: 'text-amber-700' },
+                service: { label: 'Layanan', icon: 'fa-store', color: 'text-green-600' },
+                other: { label: 'Lainnya', icon: 'fa-location-dot', color: 'text-blue-600' }
+            };
+
+            function detectCategory(tags) {
+                if (tags.tourism === 'hotel') return 'hotel';
+                if (tags.amenity === 'restaurant' || tags.amenity === 'fast_food' || tags.amenity === 'food_court') return 'restaurant';
+                if (tags.amenity === 'cafe') return 'cafe';
+                if (['atm', 'bank', 'pharmacy', 'hospital', 'clinic', 'fuel', 'marketplace', 'supermarket'].includes(tags.amenity)) return 'service';
+                return 'other';
+            }
+
+            function haversineKm(lat1, lon1, lat2, lon2) {
+                const toRad = Math.PI / 180;
+                const dLat = (lat2 - lat1) * toRad;
+                const dLon = (lon2 - lon1) * toRad;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return 6371 * c;
+            }
+
+            function formatDistance(km) {
+                if (km < 1) {
+                    return `${Math.round(km * 1000)} m`;
+                }
+                return `${km.toFixed(2)} km`;
+            }
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function renderNearbyPlaces(places) {
+                nearbyLoadingEl.classList.add('hidden');
+
+                if (!places.length) {
+                    nearbyEmptyEl.classList.remove('hidden');
+                    nearbyQuickLinksEl.classList.remove('hidden');
+                    return;
+                }
+
+                nearbyEmptyEl.classList.add('hidden');
+                nearbyQuickLinksEl.classList.add('hidden');
+
+                places.forEach((place) => {
+                    const config = categoryConfig[place.category] || categoryConfig.other;
+                    const item = document.createElement('div');
+                    item.className = 'rounded-lg border border-gray-200 p-3';
+                    item.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <p class="font-semibold text-gray-800">${escapeHtml(place.name)}</p>
+                                <p class="text-xs text-gray-500 mt-1">${escapeHtml(config.label)} · ${formatDistance(place.distanceKm)}</p>
+                            </div>
+                            <i class="fas ${config.icon} ${config.color}"></i>
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${place.lat},${place.lng}" target="_blank" class="inline-block mt-2 text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                            Lihat di Maps
+                        </a>
+                    `;
+                    nearbyListEl.appendChild(item);
+
+                    L.circleMarker([place.lat, place.lng], {
+                        radius: 5,
+                        color: '#2563eb',
+                        fillColor: '#60a5fa',
+                        fillOpacity: 0.8,
+                        weight: 1
+                    }).addTo(map)
+                    .bindPopup(`<b>${escapeHtml(place.name)}</b><br>${escapeHtml(config.label)} - ${formatDistance(place.distanceKm)}`);
+                });
+            }
+
+            function fetchNearbyPlaces() {
+                const overpassQuery = `
+                    [out:json][timeout:25];
+                    (
+                        node(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                        node(around:7000,${wisataLat},${wisataLng})["shop"~"hotel"];
+                        node(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                        way(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                        way(around:7000,${wisataLat},${wisataLng})["shop"~"hotel"];
+                        way(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                        relation(around:7000,${wisataLat},${wisataLng})["tourism"~"hotel|guest_house|motel"];
+                        relation(around:7000,${wisataLat},${wisataLng})["amenity"~"restaurant|cafe|fast_food|food_court|atm|bank|pharmacy|hospital|clinic|fuel|marketplace|supermarket"];
+                    );
+                    out center;
+                `;
+
+                const endpoints = [
+                    'https://overpass-api.de/api/interpreter',
+                    'https://overpass.kumi.systems/api/interpreter'
+                ];
+
+                const tryEndpoint = (index) => {
+                    if (index >= endpoints.length) {
+                        throw new Error('Semua endpoint Overpass gagal');
+                    }
+
+                    return fetch(`${endpoints[index]}?data=${encodeURIComponent(overpassQuery)}`)
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .catch(() => tryEndpoint(index + 1));
+                };
+
+                tryEndpoint(0)
+                    .then((data) => {
+                        const elements = (data && data.elements) ? data.elements : [];
+                        const dedupe = new Set();
+
+                        const places = elements
+                            .map((el) => {
+                                const tags = el.tags || {};
+                                const lat = el.lat || (el.center && el.center.lat);
+                                const lng = el.lon || (el.center && el.center.lon);
+                                const name = tags.name || tags.brand || tags.operator || `Lokasi ${detectCategory(tags)}`;
+
+                                if (!lat || !lng || !name) return null;
+
+                                const dedupeKey = `${name.toLowerCase()}-${lat.toFixed(5)}-${lng.toFixed(5)}`;
+                                if (dedupe.has(dedupeKey)) return null;
+                                dedupe.add(dedupeKey);
+
+                                return {
+                                    name,
+                                    lat,
+                                    lng,
+                                    category: detectCategory(tags),
+                                    distanceKm: haversineKm(wisataLat, wisataLng, lat, lng)
+                                };
+                            })
+                            .filter(Boolean)
+                            .sort((a, b) => a.distanceKm - b.distanceKm)
+                            .slice(0, 8);
+
+                        renderNearbyPlaces(places);
+                    })
+                    .catch(() => {
+                        nearbyLoadingEl.classList.add('hidden');
+                        nearbyEmptyEl.classList.remove('hidden');
+                        nearbyQuickLinksEl.classList.remove('hidden');
+                    });
+            }
+
+            fetchNearbyPlaces();
         });
     </script>
 @endsection
