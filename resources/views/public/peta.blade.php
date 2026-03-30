@@ -44,35 +44,35 @@
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Alam" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🌿 Wisata Alam</span>
+                        <span class="ml-2 text-gray-700">Wisata Alam</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Bahari" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🌊 Wisata Bahari</span>
+                        <span class="ml-2 text-gray-700"> Wisata Bahari</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Buatan" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🎢 Wisata Buatan</span>
+                        <span class="ml-2 text-gray-700"> Wisata Buatan</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Cagar Budaya" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🏛️ Cagar Budaya</span>
+                        <span class="ml-2 text-gray-700"> Cagar Budaya</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Belanja" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🛍️ Wisata Belanja</span>
+                        <span class="ml-2 text-gray-700"> Wisata Belanja</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Heritage" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🏰 Wisata Heritage</span>
+                        <span class="ml-2 text-gray-700"> Wisata Heritage</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Sejarah" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">📜 Wisata Sejarah</span>
+                        <span class="ml-2 text-gray-700"> Wisata Sejarah</span>
                     </label>
                     <label class="flex items-center">
                         <input type="radio" name="category" value="Wisata Budaya" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">🎭 Wisata Budaya</span>
+                        <span class="ml-2 text-gray-700"> Wisata Budaya</span>
                     </label>
                 </div>
             </div>
