@@ -30,7 +30,7 @@ class PublicWisataController extends Controller
         // Track visit
         WisataVisit::create([
             'wisata_id' => $wisata->id,
-            'user_id' => auth()->id(),
+            'user_id' => null,
             'ip_address' => request()->ip(),
             'visited_at' => now(),
         ]);

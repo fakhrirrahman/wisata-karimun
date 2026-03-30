@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Wisata;
 use App\Models\WisataVisit;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +30,7 @@ class WisataKunjunganController extends Controller
         
         // Ambil history kunjungan dengan pagination
         $visits = WisataVisit::where('wisata_id', $id)
+            ->with('user:id,nama,username')
             ->orderByDesc('visited_at')
             ->paginate(20);
 

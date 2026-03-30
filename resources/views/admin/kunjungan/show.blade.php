@@ -39,27 +39,19 @@
 <!-- Info Card -->
 <div class="bg-white rounded-lg shadow p-6 mb-8">
     <h4 class="text-lg font-semibold text-gray-800 mb-4">Informasi Wisata</h4>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-6">
         <div>
             <p class="text-gray-600 text-sm">Status Kunjungan</p>
-            @if($stats['total_visits'] > 500)
-                <p class="text-red-600 font-bold text-lg mt-1">🔥 Sangat Sering Dikunjungi</p>
-            @elseif($stats['total_visits'] > 250)
-                <p class="text-orange-600 font-bold text-lg mt-1">🌟 Sering Dikunjungi</p>
-            @elseif($stats['total_visits'] > 100)
-                <p class="text-yellow-600 font-bold text-lg mt-1">👍 Sedang Dikunjungi</p>
-            @elseif($stats['total_visits'] > 10)
-                <p class="text-pink-600 font-bold text-lg mt-1">📍 Jarang Dikunjungi</p>
+            @if($stats['total_visits'] === 0)
+                <p class="text-gray-600 font-bold text-lg mt-1">Tidak Pernah</p>
+            @elseif($stats['total_visits'] <= 10)
+                <p class="text-pink-600 font-bold text-lg mt-1">Jarang</p>
+            @elseif($stats['total_visits'] <= 50)
+                <p class="text-yellow-600 font-bold text-lg mt-1">Normal</p>
+            @elseif($stats['total_visits'] <= 150)
+                <p class="text-orange-600 font-bold text-lg mt-1">Sering</p>
             @else
-                <p class="text-gray-600 font-bold text-lg mt-1">❄️ Belum/Sangat Jarang Dikunjungi</p>
-            @endif
-        </div>
-        <div>
-            <p class="text-gray-600 text-sm">Kunjungan Terakhir</p>
-            @if($stats['last_visited'])
-                <p class="font-semibold text-gray-800 mt-1">{{ $stats['last_visited']->format('d M Y pukul H:i') }}</p>
-            @else
-                <p class="text-gray-600 italic mt-1">Belum pernah dikunjungi</p>
+                <p class="text-red-600 font-bold text-lg mt-1">Sangat Sering</p>
             @endif
         </div>
     </div>
@@ -100,7 +92,9 @@
                         </td>
                         <td class="px-6 py-4 text-sm">
                             @if($visit->user_id)
-                                <span class="text-gray-800">User ID: {{ $visit->user_id }}</span>
+                                <span class="text-gray-800">
+                                    {{ $visit->user->nama ?? $visit->user->username ?? ('User #' . $visit->user_id) }}
+                                </span>
                             @else
                                 <span class="text-gray-400 italic">Pengunjung Anonim</span>
                             @endif
