@@ -47,6 +47,7 @@
         @yield('content')
     </main>
 
+    @unless(request()->routeIs('peta'))
     <!-- Footer -->
     <footer class="bg-gray-900 text-white mt-12 py-8">
         <div class="max-w-7xl mx-auto px-4">
@@ -73,5 +74,6 @@
             </div>
         </div>
     </footer>
+    @endunless
 </body>
 </html>

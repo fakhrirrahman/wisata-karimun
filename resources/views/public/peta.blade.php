@@ -3,233 +3,61 @@
 @section('title', 'Peta Wisata - Karimun')
 
 @section('content')
-    <div class="h-screen flex">
-        <!-- Sidebar Filters -->
-        <aside class="w-80 bg-white shadow-lg overflow-y-auto">
-            <div class="p-6 border-b">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Filter Pencarian</h2>
-                <p class="text-gray-600 text-sm">Temukan wisata favorit Anda</p>
-            </div>
-
-            <!-- Search -->
-            <div class="p-6 border-b">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Cari Nama Wisata</label>
+    <div class="h-[calc(100vh-64px)] flex flex-col bg-gray-100 overflow-hidden">
+        <!-- Top Bar Filters -->
+        <div class="bg-white shadow-md z-10 p-4 shrink-0 flex flex-wrap items-end gap-4 relative">
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Cari Wisata</label>
                 <input type="text" id="searchInput"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 outline-none"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm"
                     placeholder="Nama wisata...">
-                <p class="text-sm text-gray-600 mt-3"><span id="wisataCount">{{ count($wisata) }}</span> wisata ditemukan</p>
             </div>
-
-            <!-- Mode Map -->
-            <div class="p-6 border-b">
-                <label class="block text-sm font-semibold text-gray-700 mb-4">Mode Tampilan Peta</label>
-                <div class="space-y-2">
-                    <label class="flex items-center">
-                        <input type="radio" name="mapMode" value="normal" checked class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">Peta Normal (Batas Kecamatan)</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="mapMode" value="heatmap" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">Heatmap Kunjungan Wisata</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Kategori Filter -->
-            <div class="p-6 border-b">
-                <label class="block text-sm font-semibold text-gray-700 mb-4">Kategori</label>
-                <div class="space-y-2 radio-group">
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="all" checked class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">Semua Kategori</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Alam" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700">Wisata Alam</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Bahari" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Bahari</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Buatan" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Buatan</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Cagar Budaya" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Cagar Budaya</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Belanja" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Belanja</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Heritage" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Heritage</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Sejarah" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Sejarah</span>
-                    </label>
-                    <label class="flex items-center">
-                        <input type="radio" name="category" value="Wisata Budaya" class="h-4 w-4 text-blue-600">
-                        <span class="ml-2 text-gray-700"> Wisata Budaya</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Kecamatan Filter -->
-            <div class="p-6 border-b">
-                <label class="block text-sm font-semibold text-gray-700 mb-4">Kecamatan</label>
-                <div class="space-y-2">
+            
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Kecamatan</label>
+                <select id="kecamatanSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
+                    <option value="all">Semua Kecamatan</option>
                     @php
-                        // Harus sesuai dengan NAMOBJ yang ada di GeoJSON
                         $kecamatanList = [
-                            'BURU',
-                            'DURAI',
-                            'KARIMUN',
-                            'KUNDUR',
-                            'KUNDUR BARAT',
-                            'MERAL',
-                            'MORO',
-                            'TEBING',
+                            'BURU', 'DURAI', 'KARIMUN', 'KUNDUR', 'KUNDUR BARAT', 'MERAL', 'MORO', 'TEBING'
                         ];
                     @endphp
-                    <label class="flex items-center">
-                        <input type="checkbox" class="h-4 w-4 text-blue-600 kecamatan-checkbox" value="all" checked>
-                        <span class="ml-2 text-gray-700">Semua Kecamatan</span>
-                    </label>
                     @foreach ($kecamatanList as $kec)
-                        <label class="flex items-center">
-                            <input type="checkbox" class="h-4 w-4 text-blue-600 kecamatan-checkbox"
-                                value="{{ $kec }}">
-                            <span class="ml-2 text-gray-700">{{ $kec }}</span>
-                        </label>
+                        <option value="{{ $kec }}">{{ $kec }}</option>
                     @endforeach
-                </div>
+                </select>
             </div>
 
-
-            <!-- Legend -->
-            <div class="p-6 bg-gray-50 border-t">
-                <h3 class="text-sm font-semibold text-gray-700 mb-4">Legenda Peta</h3>
-
-                <!-- Kecamatan Legend -->
-                <div class="mb-6">
-                    <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Kecamatan</p>
-                    <div class="space-y-2 text-xs">
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #FF6B6B;"></div>
-                            <span>BURU</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #4ECDC4;"></div>
-                            <span>DURAI</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #45B7D1;"></div>
-                            <span>KARIMUN</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #FFA07A;"></div>
-                            <span>KUNDUR</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #98D8C8;"></div>
-                            <span>KUNDUR BARAT</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #F7DC6F;"></div>
-                            <span>MERAL</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #BB8FCE;"></div>
-                            <span>MORO</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #85C1E2;"></div>
-                            <span>TEBING</span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <div id="normalLegend">
-                    <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Kategori Wisata</p>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #22c55e;"></div>
-                            <span>Wisata Alam</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #0ea5e9;"></div>
-                            <span>Wisata Bahari</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #3b82f6;"></div>
-                            <span>Wisata Buatan</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #ef4444;"></div>
-                            <span>Cagar Budaya</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #ec4899;"></div>
-                            <span>Wisata Belanja</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #f59e0b;"></div>
-                            <span>Wisata Heritage</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #8b5cf6;"></div>
-                            <span>Wisata Sejarah</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-5 rounded mr-2" style="background-color: #a855f7;"></div>
-                            <span>Wisata Budaya</span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <div id="heatLegend" class="hidden">
-                    <p class="text-xs font-semibold text-gray-600 mb-3 uppercase">Heatmap Kunjungan (Terang ke Gelap)</p>
-                    <div class="space-y-2 text-sm">
-                        <div class="flex items-center">
-                            <div class="w-5 h-3 rounded mr-2" style="background-color: #FFF5EB;"></div>
-                            <span>Tidak Pernah (0)</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-3 rounded mr-2" style="background-color: #FEE6CE;"></div>
-                            <span>Jarang (1-10)</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-3 rounded mr-2" style="background-color: #FDAE6B;"></div>
-                            <span>Normal (11-50)</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-3 rounded mr-2" style="background-color: #E6550D;"></div>
-                            <span>Sering (51-150)</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-5 h-3 rounded mr-2" style="background-color: #7F2704;"></div>
-                            <span>Sangat Sering (&gt;150)</span>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex-1 min-w-[200px]">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Kategori</label>
+                <select id="kategoriSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
+                    <option value="all">Semua Kategori</option>
+                    <option value="Wisata Alam">Wisata Alam</option>
+                    <option value="Wisata Bahari">Wisata Bahari</option>
+                    <option value="Wisata Buatan">Wisata Buatan</option>
+                    <option value="Cagar Budaya">Cagar Budaya</option>
+                    <option value="Wisata Belanja">Wisata Belanja</option>
+                    <option value="Wisata Heritage">Wisata Heritage</option>
+                    <option value="Wisata Sejarah">Wisata Sejarah</option>
+                    <option value="Wisata Budaya">Wisata Budaya</option>
+                </select>
             </div>
-        </aside>
+
+            <div>
+                <button id="resetFilterBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition text-sm font-semibold h-[38px]">
+                    Reset Filter
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white px-4 py-1.5 border-b shadow-sm flex justify-between items-center text-xs text-gray-600 shrink-0">
+            <span>Ditemukan: <strong id="wisataCount" class="text-blue-600">{{ count($wisata) }}</strong> wisata</span>
+            <span class="italic font-medium">Buka panel <strong>Layer</strong> di sudut kanan atas peta untuk mengaktifkan Heatmap.</span>
+        </div>
 
         <!-- Map -->
-        <div class="flex-1 relative">
+        <div class="flex-1 relative z-0">
             <div id="map" class="w-full h-full"></div>
-            <a href="{{ route('beranda') }}"
-                class="absolute top-6 right-6 bg-white text-gray-800 px-4 py-2 rounded-lg shadow-lg hover:shadow-xl transition">
-                <i class="fas fa-home mr-2"></i>Kembali ke Beranda
-            </a>
         </div>
     </div>
 
@@ -239,40 +67,126 @@
             border-radius: 16px;
             overflow: hidden;
         }
-
         .wisata-popup .leaflet-popup-content {
             margin: 0;
             width: 300px !important;
         }
-
         .wisata-popup .leaflet-popup-tip {
             background: #ffffff;
+        }
+
+        /* Custom Legend Control Styles */
+        .info.legend {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 1px solid rgba(0,0,0,0.05);
+            color: #374151;
+            font-family: inherit;
+            min-width: 300px;
+        }
+        
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .legend-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        .legend-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .legend-section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 10px;
+            margin-top: 14px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-section-title:first-child {
+            margin-top: 0;
+        }
+        
+        /* Layer Control specific styling adjustment */
+        .leaflet-control-layers {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            padding: 4px;
+        }
+        .leaflet-control-layers-list {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
         }
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             /* ================== MAP INIT ================== */
-            const map = L.map('map');
+            // Inisialisasi peta dan pindahkan zoom control agar tidak menimpa layer
+            const map = L.map('map', {
+                zoomControl: false 
+            });
+            L.control.zoom({ position: 'topleft' }).addTo(map);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+            });
+
+            const satelitLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; Esri &mdash; Esri, iCube, Earthstar Geographics'
+            });
+
+            // Set default Map Layer
+            osmLayer.addTo(map);
 
             function coordsToLatLng(coords) {
-                return L.latLng(coords[1], coords[0]); // buang Z
+                return L.latLng(coords[1], coords[0]); 
             }
 
-            /* ================== STATE ================== */
+            /* ================== STATE & LAYERS ================== */
             const wisataLayerGroup = L.layerGroup().addTo(map);
-            let kecamatanGeoJsonLayer = null;
+            const batasKecamatanGroup = L.layerGroup().addTo(map); // Menyala by default
+            const heatmapGroup = L.layerGroup(); // Mati by default (dicentang lewat overlay)
+            
             let markerMap = {};
-            let visitsPerKecamatan = {};
+            let jumlahWisataPerKecamatan = {};
             const wisataData = {!! json_encode($wisata) !!};
-            let currentMapMode = 'normal';
-            const normalLegendEl = document.getElementById('normalLegend');
-            const heatLegendEl = document.getElementById('heatLegend');
+            let geojsonData = null;
+            let currentGeoJsonLayerBatas = null;
+            let currentGeoJsonLayerHeatmap = null;
+            
             const detailBaseUrl = @json(url('/detail'));
 
             const categoryColor = {
@@ -286,49 +200,27 @@
                 'Wisata Budaya': '#a855f7'
             };
 
+            const kecamatanColors = {
+                'BURU': '#FF6B6B',
+                'DURAI': '#4ECDC4',
+                'KARIMUN': '#45B7D1',
+                'KUNDUR': '#FFA07A',
+                'KUNDUR BARAT': '#98D8C8',
+                'MERAL': '#F7DC6F',
+                'MORO': '#BB8FCE',
+                'TEBING': '#85C1E2'
+            };
+
             function canonical(name) {
                 return (name || '').toLowerCase().trim();
             }
 
-            function getSelectedKecamatanSet() {
-                const all = document.querySelector('.kecamatan-checkbox[value="all"]').checked;
-                if (all) return null;
-
-                const set = new Set();
-                document.querySelectorAll('.kecamatan-checkbox:not([value="all"])').forEach(cb => {
-                    if (cb.checked) set.add(canonical(cb.value));
-                });
-                return set;
-            }
-
-            function getColorByVisits(v) {
-                if (v > 150) return '#7F2704';
-                if (v > 50) return '#E6550D';
-                if (v > 10) return '#FDAE6B';
-                if (v > 0) return '#FEE6CE';
-                return '#FFF5EB';
-            }
-
-            function getColorByKecamatan(name) {
-                const kecamatanColors = {
-                    'BURU': '#FF6B6B',
-                    'DURAI': '#4ECDC4',
-                    'KARIMUN': '#45B7D1',
-                    'KUNDUR': '#FFA07A',
-                    'KUNDUR BARAT': '#98D8C8',
-                    'MERAL': '#F7DC6F',
-                    'MORO': '#BB8FCE',
-                    'TEBING': '#85C1E2'
-                };
-                return kecamatanColors[name] || '#95A5A6';
-            }
-
-            function getLikertStatus(v) {
-                if (v === 0) return 'Tidak Pernah';
-                if (v <= 10) return 'Jarang';
-                if (v <= 50) return 'Normal';
-                if (v <= 150) return 'Sering';
-                return 'Sangat Sering';
+            function getColorByJumlahWisata(v) {
+                if (v >= 11) return '#a50f15'; // Sangat padat (>10)
+                if (v === 10) return '#de2d26'; // Padat (10)
+                if (v >= 5 && v <= 9) return '#fb6a4a'; // Sedang (5-9)
+                if (v >= 1 && v <= 4) return '#fcae91'; // Sedikit (1-4)
+                return '#fee5d9'; // Kosong (0)
             }
 
             function escapeHtml(value) {
@@ -360,7 +252,7 @@
 
                 const imageBlock = imageUrl
                     ? `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(item.nama)}" style="width:100%;height:140px;object-fit:cover;display:block;">`
-                    : `<div style="width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e2e8f0,#f8fafc);color:#64748b;font-size:13px;font-weight:600;">Foto belum tersedia</div>`;
+                    : `<div style="width:100%;height:140px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f1f5f9,#ffffff);color:#64748b;font-size:13px;font-weight:600;">Foto belum tersedia</div>`;
 
                 return `
                     <article style="background:#fff;">
@@ -372,184 +264,248 @@
                             <p style="margin:10px 0 0;color:#64748b;font-size:12px;">
                                 <span style="font-weight:700;">Lokasi:</span> ${escapeHtml(item.kecamatan || item.alamat || 'Karimun')}
                             </p>
-                            <div style="margin:8px 0 0;color:#475569;font-size:12px;">
-                                <span style="font-weight:700;">Kunjungan:</span> ${visits} (${escapeHtml(getLikertStatus(visits))})
+                            <div style="margin:8px 0 0;color:#ef4444;font-size:12px;font-weight:700;">
+                                <i class="fas fa-fire mr-1"></i>Kunjungan: ${visits} kali
                             </div>
-                            <a href="${escapeHtml(detailUrl)}" style="display:block;margin-top:12px;background:#059669;color:#fff;text-align:center;padding:10px 12px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">Lihat Detail</a>
+                            <a href="${escapeHtml(detailUrl)}" style="display:block;margin-top:12px;background:#2563eb;color:#fff;text-align:center;padding:10px 12px;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;">Lihat Detail</a>
                         </div>
                     </article>
                 `;
             }
 
-            function updateLegendByMode() {
-                if (currentMapMode === 'heatmap') {
-                    normalLegendEl.classList.add('hidden');
-                    heatLegendEl.classList.remove('hidden');
-                } else {
-                    heatLegendEl.classList.add('hidden');
-                    normalLegendEl.classList.remove('hidden');
-                }
-            }
-
-            /* ================== HITUNG KUNJUNGAN ================== */
+            /* ================== PERHITUNGAN DATA ================== */
             @foreach ($wisata as $item)
-                visitsPerKecamatan['{{ $item->kecamatan }}'] =
-                    (visitsPerKecamatan['{{ $item->kecamatan }}'] || 0) + {{ $item->visits ?? 0 }};
+                {
+                    let kec = ('{{ $item->kecamatan }}' || '').toUpperCase();
+                    jumlahWisataPerKecamatan[kec] = (jumlahWisataPerKecamatan[kec] || 0) + 1;
+                }
             @endforeach
 
-            /* ================== LOAD GEOJSON ================== */
-            fetch('{{ asset('geojson/kecamatan_kabkarimun.geojson') }}')
-                .then(res => res.json())
-                .then(data => {
+            /* ================== LEAFLET LAYER CONTROLS ================== */
+            const baseMapsConfig = {
+                "OpenStreetMap": osmLayer,
+                "Satelit": satelitLayer
+            };
 
-                    kecamatanGeoJsonLayer = L.geoJSON(data, {
-                        coordsToLatLng: coordsToLatLng,
+            const overlayMapsConfig = {
+                "Semua Batas Kecamatan": batasKecamatanGroup,
+                "Heatmap Jumlah Wisata": heatmapGroup,
+                "Sebaran Lokasi Wisata": wisataLayerGroup
+            };
 
-                        style: function(feature) {
-                            const name = feature.properties.NAMOBJ;
-                            const visits = visitsPerKecamatan[name] || 0;
-                            const selected = getSelectedKecamatanSet();
-                            const active = selected === null || selected.has(canonical(name));
+            L.control.layers(baseMapsConfig, overlayMapsConfig, { collapsed: false, position: 'topright' }).addTo(map);
 
-                            return {
-                                color: '#222',
-                                weight: active ? 2 : 0,
-                                opacity: active ? 1 : 0,
-                                fillColor: currentMapMode === 'heatmap' ? getColorByVisits(visits) : getColorByKecamatan(name),
-                                fillOpacity: active ? 0.7 : 0
-                            };
-                        },
+            /* ================== CUSTOM LEGEND CONTROL ================== */
+            const legend = L.control({ position: 'bottomleft' });
 
-                        onEachFeature: function(feature, layer) {
-                            const name = feature.properties.NAMOBJ;
-                            const visits = visitsPerKecamatan[name] || 0;
-
-                            layer.bindPopup(`
-                        <strong>${name}</strong><br>
-                        Total Kunjungan: ${visits}
-                    `);
-
-                           
-                            layer.on('mouseover', () => layer.setStyle({
-                                weight: 4
-                            }));
-                            layer.on('mouseout', () => kecamatanGeoJsonLayer.resetStyle(layer));
-                        }
-                    }).addTo(map);
-
-                    // Load wisata markers AFTER GeoJSON loaded
-                    wisataData.forEach(function(item) {
-                        let marker = L.circleMarker(
-                            [item.latitude, item.longitude],
-                            {
-                                radius: 10,
-                                fillColor: categoryColor[item.kategori] || '#6b7280',
-                                color: '#fff',
-                                weight: 2,
-                                fillOpacity: 0.9
-                            }
-                        ).addTo(wisataLayerGroup)
-                        .bindPopup(buildWisataPopup(item), {
-                            maxWidth: 320,
-                            className: 'wisata-popup'
-                        });
-
-                        markerMap[item.id] = marker;
-                    });
-
-                    map.fitBounds(kecamatanGeoJsonLayer.getBounds());
-                });
-
-            /* ================== FILTER ================== */
-            function updateFilters() {
-
-                const category = document.querySelector('input[name="category"]:checked').value;
-                const selectedKecamatan = [];
-                const all = document.querySelector('.kecamatan-checkbox[value="all"]').checked;
-
-                if (!all) {
-                    document.querySelectorAll('.kecamatan-checkbox:not([value="all"])').forEach(cb => {
-                        if (cb.checked) selectedKecamatan.push(cb.value);
-                    });
+            legend.onAdd = function (map) {
+                const div = L.DomUtil.create('div', 'info legend');
+                
+                let html = `<div class="legend-section-title">Batas Wilayah Kecamatan</div>`;
+                html += `<div class="legend-grid">`;
+                for (let kec in kecamatanColors) {
+                    html += `<div class="legend-item"><div class="legend-color" style="background-color: ${kecamatanColors[kec]}; opacity: 0.7;"></div>${kec}</div>`;
                 }
+                html += `</div>`;
+
+                html += `<div class="legend-section-title">Kategori Wisata</div>`;
+                html += `<div class="legend-grid">`;
+                for (let kat in categoryColor) {
+                    html += `<div class="legend-item"><div class="legend-circle" style="background-color: ${categoryColor[kat]};"></div>${kat}</div>`;
+                }
+                html += `</div>`;
+
+                html += `<div class="legend-section-title">Heatmap Jumlah Wisata</div>`;
+                html += `<div class="legend-grid" style="grid-template-columns: 1fr;">`;
+                const heatmaps = [
+                    { label: '0 Wisata', color: '#fee5d9' },
+                    { label: '1 - 4 Wisata', color: '#fcae91' },
+                    { label: '5 - 9 Wisata', color: '#fb6a4a' },
+                    { label: '10 Wisata', color: '#de2d26' },
+                    { label: '11 - 17 Wisata', color: '#a50f15' }
+                ];
+                heatmaps.forEach(h => {
+                    html += `<div class="legend-item"><div class="legend-color" style="background-color: ${h.color}; opacity: 0.9;"></div>${h.label}</div>`;
+                });
+                html += `</div>`;
+
+                div.innerHTML = html;
+                
+                // Mencegah interaksi klik di legend tembus ke map
+                L.DomEvent.disableClickPropagation(div);
+                
+                return div;
+            };
+
+            legend.addTo(map);
+
+            /* ================== LOGIKA FILTER & RENDER ================== */
+            const searchInput = document.getElementById('searchInput');
+            const katSelect = document.getElementById('kategoriSelect');
+            const kecSelect = document.getElementById('kecamatanSelect');
+            const wisataCountEl = document.getElementById('wisataCount');
+            const resetBtn = document.getElementById('resetFilterBtn');
+
+            function renderGeoJsonLayers() {
+                if (!geojsonData) return;
+                
+                // Bersihkan layer sebelumnya
+                batasKecamatanGroup.clearLayers();
+                heatmapGroup.clearLayers();
+
+                const selectedFilterKec = canonical(kecSelect.value);
+
+                // --- 1. Batas Kecamatan Layer ---
+                currentGeoJsonLayerBatas = L.geoJSON(geojsonData, {
+                    coordsToLatLng: coordsToLatLng,
+                    style: function (feature) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const nameCanon = canonical(feature.properties.NAMOBJ);
+                        
+                        // Menyorot kecamatan yang sedang dipilih
+                        const isSelected = selectedFilterKec === 'all' || selectedFilterKec === nameCanon;
+                        
+                        return {
+                            color: isSelected ? '#1f2937' : '#9ca3af',
+                            weight: isSelected ? 2 : 1,
+                            opacity: isSelected ? 0.9 : 0.4,
+                            fillColor: kecamatanColors[nameUpper] || '#95A5A6',
+                            fillOpacity: isSelected ? 0.5 : 0.1
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
+                        layer.bindPopup(`<div style="text-align:center;"><strong>Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:12px;color:#6b7280;">Jumlah Wisata: ${visits}</span></div>`);
+                        
+                        // Efek Hover
+                        layer.on('mouseover', () => {
+                            layer.setStyle({ weight: 3, fillOpacity: 0.7 });
+                        });
+                        layer.on('mouseout', () => {
+                            currentGeoJsonLayerBatas.resetStyle(layer);
+                        });
+                    }
+                }).addTo(batasKecamatanGroup);
+
+                // --- 2. Heatmap Layer ---
+                currentGeoJsonLayerHeatmap = L.geoJSON(geojsonData, {
+                    coordsToLatLng: coordsToLatLng,
+                    style: function (feature) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const nameCanon = canonical(feature.properties.NAMOBJ);
+                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
+                        
+                        const isSelected = selectedFilterKec === 'all' || selectedFilterKec === nameCanon;
+
+                        return {
+                            color: '#1f2937', // Border warna gelap agar jelas
+                            weight: isSelected ? 1.5 : 0.5,
+                            opacity: isSelected ? 0.8 : 0.3,
+                            fillColor: getColorByJumlahWisata(visits),
+                            fillOpacity: isSelected ? 0.85 : 0.2
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
+                        layer.bindPopup(`<div style="text-align:center;color:#ef4444;"><strong>🔥 Heatmap Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:13px;font-weight:bold;color:#4b5563;">Jumlah Wisata: ${visits}</span></div>`);
+                        
+                        // Efek Hover
+                        layer.on('mouseover', () => {
+                            layer.setStyle({ weight: 3, fillOpacity: 0.95 });
+                        });
+                        layer.on('mouseout', () => {
+                            currentGeoJsonLayerHeatmap.resetStyle(layer);
+                        });
+                    }
+                }).addTo(heatmapGroup);
+            }
+
+            function applyFilters() {
+                const keyword = canonical(searchInput.value);
+                const valKat = katSelect.value;
+                const valKec = canonical(kecSelect.value);
 
                 let count = 0;
-                let maxVisibleVisits = 0;
 
-                document.querySelectorAll('.wisata-item').forEach(item => {
-                    const okCategory = category === 'all' || item.dataset.wisataCategory === category;
-                    const okKec = selectedKecamatan.length === 0 ||
-                        selectedKecamatan.includes(item.dataset.wisataKecamatan);
+                wisataData.forEach(item => {
+                    const matchKec = valKec === 'all' || canonical(item.kecamatan) === valKec;
+                    const matchKat = valKat === 'all' || item.kategori === valKat;
+                    const matchKey = keyword === '' || canonical(item.nama).includes(keyword);
 
-                    const visible = okCategory && okKec;
-                    if (!visible) return;
-
-                    const wisataObj = wisataData.find(w => String(w.id) === String(item.dataset.wisataId));
-                    const v = Number(wisataObj?.visits || 0);
-                    if (v > maxVisibleVisits) maxVisibleVisits = v;
-                });
-
-                document.querySelectorAll('.wisata-item').forEach(item => {
-                    const okCategory = category === 'all' || item.dataset.wisataCategory === category;
-                    const okKec = selectedKecamatan.length === 0 ||
-                        selectedKecamatan.includes(item.dataset.wisataKecamatan);
-
-                    const visible = okCategory && okKec;
-                    item.style.display = visible ? 'block' : 'none';
-
-                    if (markerMap[item.dataset.wisataId]) {
-                        const wisataObj = wisataData.find(w => String(w.id) === String(item.dataset.wisataId));
-                        const visits = Number(wisataObj?.visits || 0);
-                        const baseRadius = currentMapMode === 'heatmap'
-                            ? Math.max(6, Math.min(16, 6 + (maxVisibleVisits > 0 ? (visits / maxVisibleVisits) * 10 : 0)))
-                            : 10;
-
-                        markerMap[item.dataset.wisataId].setStyle({
-                            radius: baseRadius,
-                            fillColor: currentMapMode === 'heatmap'
-                                ? getColorByVisits(visits)
-                                : (categoryColor[wisataObj?.kategori] || '#6b7280'),
-                            color: '#fff',
-                            weight: 2,
-                            opacity: visible ? 1 : 0.2,
-                            fillOpacity: visible ? 0.9 : 0.2
-                        });
+                    const visible = matchKec && matchKat && matchKey;
+                    
+                    if (markerMap[item.id]) {
+                        if (visible) {
+                            if (!wisataLayerGroup.hasLayer(markerMap[item.id])) {
+                                wisataLayerGroup.addLayer(markerMap[item.id]);
+                            }
+                        } else {
+                            if (wisataLayerGroup.hasLayer(markerMap[item.id])) {
+                                wisataLayerGroup.removeLayer(markerMap[item.id]);
+                            }
+                        }
                     }
 
                     if (visible) count++;
                 });
 
-                document.getElementById('wisataCount').textContent = count;
-
-                if (kecamatanGeoJsonLayer) {
-                    kecamatanGeoJsonLayer.setStyle(feature =>
-                        kecamatanGeoJsonLayer.options.style(feature)
-                    );
-                }
+                wisataCountEl.textContent = count;
+                
+                // Menata ulang style/highlight GeoJSON berdasarkan kecamatan yang di-filter
+                renderGeoJsonLayers();
             }
 
-            document.querySelectorAll('input').forEach(el =>
-                el.addEventListener('change', updateFilters)
-            );
-
-            document.querySelectorAll('input[name="mapMode"]').forEach(el => {
-                el.addEventListener('change', () => {
-                    currentMapMode = document.querySelector('input[name="mapMode"]:checked').value;
-                    updateLegendByMode();
-
-                    if (kecamatanGeoJsonLayer) {
-                        kecamatanGeoJsonLayer.setStyle(feature =>
-                            kecamatanGeoJsonLayer.options.style(feature)
-                        );
+            // Inisialisasi Titik Wisata Marker
+            wisataData.forEach(function (item) {
+                let marker = L.circleMarker(
+                    [item.latitude, item.longitude],
+                    {
+                        radius: 8,
+                        fillColor: categoryColor[item.kategori] || '#6b7280',
+                        color: '#ffffff',
+                        weight: 2,
+                        fillOpacity: 0.95,
+                        opacity: 1
                     }
-
-                    updateFilters();
-                });
+                );
+                
+                marker.bindPopup(buildWisataPopup(item), { maxWidth: 320, className: 'wisata-popup' });
+                markerMap[item.id] = marker;
+                marker.addTo(wisataLayerGroup);
             });
 
-            updateLegendByMode();
+            // Pengambilan dan Pemasangan Data GeoJSON
+            fetch('{{ asset('geojson/jml_wisata.geojson') }}?v={{ time() }}')
+                .then(res => res.json())
+                .then(data => {
+                    geojsonData = data;
+                    renderGeoJsonLayers();
+                    
+                    // Memfokuskan tampilan peta ke GeoJSON
+                    if (currentGeoJsonLayerBatas) {
+                        map.fitBounds(currentGeoJsonLayerBatas.getBounds(), { padding: [50, 50] });
+                    }
+                });
+
+            // Event Listener untuk elemen Filter
+            searchInput.addEventListener('input', applyFilters);
+            katSelect.addEventListener('change', applyFilters);
+            kecSelect.addEventListener('change', applyFilters);
+
+            resetBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                katSelect.value = 'all';
+                kecSelect.value = 'all';
+                applyFilters();
+                
+                // Jika ingin mereset tampilan zoom juga
+                if (currentGeoJsonLayerBatas) {
+                    map.fitBounds(currentGeoJsonLayerBatas.getBounds(), { padding: [50, 50] });
+                }
+            });
 
         });
     </script>
-
 @endsection
