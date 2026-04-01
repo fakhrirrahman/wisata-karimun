@@ -54,7 +54,20 @@
                 >
                     <option value="">Pilih kecamatan</option>
                     @php
-                        $listKec = ['BURU', 'DURAI', 'KARIMUN', 'KUNDUR', 'KUNDUR BARAT', 'MERAL', 'MORO', 'TEBING'];
+                            $listKec = [
+                                'BELAT',
+                                'BURU',
+                                'DURAI',
+                                'KARIMUN',
+                                'KUNDUR',
+                                'KUNDUR BARAT',
+                                'KUNDUR UTARA',
+                                'MERAL',
+                                'MERAL BARAT',
+                                'MORO',
+                                'TEBING',
+                                'UNGAR'
+                            ];                    
                     @endphp
                     @foreach($listKec as $kec)
                         <option value="{{ $kec }}" {{ old('kecamatan') == $kec ? 'selected' : '' }}>{{ $kec }}</option>
