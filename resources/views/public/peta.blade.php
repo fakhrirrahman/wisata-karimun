@@ -181,7 +181,7 @@
             const heatmapGroup = L.layerGroup(); // Mati by default (dicentang lewat overlay)
             
             let markerMap = {};
-            let jumlahWisataPerKecamatan = {};
+            let jumlahWisataPerKecamatan = {!! json_encode($jumlahWisataPerKecamatan ?? []) !!};
             const wisataData = {!! json_encode($wisata) !!};
             let geojsonData = null;
             let currentGeoJsonLayerBatas = null;
@@ -272,14 +272,6 @@
                     </article>
                 `;
             }
-
-            /* ================== PERHITUNGAN DATA ================== */
-            @foreach ($wisata as $item)
-                {
-                    let kec = ('{{ $item->kecamatan }}' || '').toUpperCase();
-                    jumlahWisataPerKecamatan[kec] = (jumlahWisataPerKecamatan[kec] || 0) + 1;
-                }
-            @endforeach
 
             /* ================== LEAFLET LAYER CONTROLS ================== */
             const baseMapsConfig = {

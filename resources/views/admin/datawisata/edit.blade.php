@@ -47,6 +47,26 @@
                         @error('kategori')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
                     </div>
 
+                    <!-- Kecamatan -->
+                    <div>
+                        <label for="kecamatan" class="block text-sm font-medium text-gray-700 mb-2">Kecamatan *</label>
+                        <select 
+                            id="kecamatan" 
+                            name="kecamatan"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none @error('kecamatan') border-red-500 @enderror"
+                            required
+                        >
+                            <option value="">Pilih kecamatan</option>
+                            @php
+                                $listKec = ['BURU', 'DURAI', 'KARIMUN', 'KUNDUR', 'KUNDUR BARAT', 'MERAL', 'MORO', 'TEBING'];
+                            @endphp
+                            @foreach($listKec as $kec)
+                                <option value="{{ $kec }}" {{ old('kecamatan', $wisata->kecamatan) == $kec ? 'selected' : '' }}>{{ $kec }}</option>
+                            @endforeach
+                        </select>
+                        @error('kecamatan')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                    </div>
+
                     <!-- Latitude -->
                     <div>
                         <label for="latitude" class="block text-sm font-medium text-gray-700 mb-2">Latitude *</label>
@@ -199,6 +219,10 @@
                     <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                         {{ $wisata->kategori }}
                     </span>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 uppercase">Kecamatan</p>
+                    <p class="font-semibold text-gray-800">{{ $wisata->kecamatan ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-xs text-gray-500 uppercase">Koordinat</p>

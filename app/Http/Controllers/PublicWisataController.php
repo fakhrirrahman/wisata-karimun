@@ -54,7 +54,13 @@ class PublicWisataController extends Controller
         
         $wisata = $query->get();
 
-        return view('public.peta', compact('wisata', 'selectedKecamatans'));
+        // Hitung total wisata per kecamatan langsung dari database
+        $jumlahWisataPerKecamatan = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, count(*) as total')
+            ->groupBy('kecamatan')
+            ->pluck('total', 'kec')
+            ->toArray();
+
+        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahWisataPerKecamatan'));
     }
 
     public function apiGetAllWisata()

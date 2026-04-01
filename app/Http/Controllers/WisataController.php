@@ -25,6 +25,7 @@ class WisataController extends Controller
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'kategori' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'latitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'longitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
@@ -37,6 +38,7 @@ class WisataController extends Controller
         $wisata->nama = $request->nama;
         $wisata->deskripsi = $request->deskripsi;
         $wisata->kategori = $request->kategori;
+        $wisata->kecamatan = $request->kecamatan;
         $wisata->alamat = $request->alamat;
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
@@ -66,6 +68,7 @@ class WisataController extends Controller
             'nama' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'kategori' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'latitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'longitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
@@ -78,6 +81,7 @@ class WisataController extends Controller
         $wisata->nama = $request->nama;
         $wisata->deskripsi = $request->deskripsi;
         $wisata->kategori = $request->kategori;
+        $wisata->kecamatan = $request->kecamatan;
         $wisata->alamat = $request->alamat;
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
