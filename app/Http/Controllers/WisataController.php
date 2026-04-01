@@ -43,7 +43,7 @@ class WisataController extends Controller
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
         $wisata->harga = $request->harga;
-        $wisata->fasilitas = json_encode($request->fasilitas);
+        $wisata->fasilitas = $request->fasilitas;
 
         if ($request->hasFile('gambar')) {
             $imagePath = $request->file('gambar')->storeAs('wisata_images', 
@@ -86,7 +86,7 @@ class WisataController extends Controller
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
         $wisata->harga = $request->harga;
-        $wisata->fasilitas = json_encode($request->fasilitas);
+        $wisata->fasilitas = $request->fasilitas;
 
         if ($request->hasFile('gambar')) {
             if ($wisata->gambar) {

@@ -159,7 +159,10 @@
                     <div class="space-y-2">
                         @php
                             $fasilitas_list = ['Mushola', 'Tempat Makan', 'Toilet', 'Parkir', 'Kamar Bilas', 'Toko Souvenir', 'Pengamanan'];
-                            $wisata_fasilitas = is_array($wisata->fasilitas) ? $wisata->fasilitas : [];
+                            $wisata_fasilitas = is_array($wisata->fasilitas)
+                                ? $wisata->fasilitas
+                                : (json_decode($wisata->fasilitas, true) ?? []);
+                            $wisata_fasilitas = old('fasilitas', $wisata_fasilitas);
                         @endphp
                         @foreach($fasilitas_list as $f)
                             <label class="flex items-center">
