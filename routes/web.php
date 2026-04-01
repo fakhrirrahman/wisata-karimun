@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WisataController;
 use App\Http\Controllers\WisataKunjunganController;
+use App\Http\Controllers\WisataNearbyPlaceController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\PublicWisataController;
 
@@ -37,6 +38,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [WisataController::class, 'edit'])->name('edit');
         Route::put('/{id}', [WisataController::class, 'update'])->name('update');
         Route::delete('/{id}', [WisataController::class, 'destroy'])->name('destroy');
+
+        // Nearby Places Management
+        Route::prefix('/{wisataId}/lokasi-terdekat')->name('nearby.')->group(function () {
+            Route::get('/', [WisataNearbyPlaceController::class, 'index'])->name('index');
+            Route::get('/create', [WisataNearbyPlaceController::class, 'create'])->name('create');
+            Route::post('/', [WisataNearbyPlaceController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [WisataNearbyPlaceController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [WisataNearbyPlaceController::class, 'update'])->name('update');
+            Route::delete('/{id}', [WisataNearbyPlaceController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Kunjungan Management

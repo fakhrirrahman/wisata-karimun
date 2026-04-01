@@ -64,6 +64,9 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm space-x-2 flex">
+                            <a href="{{ route('datawisata.nearby.index', $item->id) }}" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded transition" title="Lokasi Terdekat">
+                                <i class="fas fa-location-dot"></i>
+                            </a>
                             <a href="{{ route('datawisata.edit', $item->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded transition" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
