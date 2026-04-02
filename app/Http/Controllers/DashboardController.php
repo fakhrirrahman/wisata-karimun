@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $wisataData = Wisata::select('id', 'nama', 'latitude', 'longitude', 'kategori', 'harga')
             ->limit(200) // Limit untuk performa
             ->get();
-        
+
         // Hitung kategori dengan CACHE
         $kategoriCount = Wisata::selectRaw('kategori, COUNT(*) as total')
             ->groupBy('kategori')
@@ -40,8 +40,8 @@ class DashboardController extends Controller
             ->orderBy('jumlah', 'desc')
             ->get()
             ->groupBy('tahun')
-            ->map(function($items) {
-                return $items->take(5)->map(function($item) {
+            ->map(function ($items) {
+                return $items->take(5)->map(function ($item) {
                     return [
                         'nama' => $item->wisata->nama ?? 'N/A',
                         'jumlah' => $item->jumlah
@@ -75,17 +75,26 @@ class DashboardController extends Controller
     public function getWisataPerBulan(Request $request)
     {
         $tahun = $request->get('tahun', date('Y'));
-        
+
         $wisataPerBulan = WisataVisit::selectRaw('MONTH(visited_at) as bulan, COUNT(*) as total')
             ->whereYear('visited_at', $tahun)
             ->groupBy('bulan')
             ->orderBy('bulan', 'asc')
             ->get()
-            ->map(function($item) {
+            ->map(function ($item) {
                 $namaBulan = [
-                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                    1 => 'Januari',
+                    2 => 'Februari',
+                    3 => 'Maret',
+                    4 => 'April',
+                    5 => 'Mei',
+                    6 => 'Juni',
+                    7 => 'Juli',
+                    8 => 'Agustus',
+                    9 => 'September',
+                    10 => 'Oktober',
+                    11 => 'November',
+                    12 => 'Desember'
                 ];
                 return [
                     'bulan' => $namaBulan[$item->bulan],
@@ -103,8 +112,8 @@ class DashboardController extends Controller
             ->orderBy('jumlah', 'desc')
             ->get()
             ->groupBy('bulan')
-            ->map(function($items) {
-                return $items->take(5)->map(function($item) {
+            ->map(function ($items) {
+                return $items->take(5)->map(function ($item) {
                     return [
                         'nama' => $item->wisata->nama ?? 'N/A',
                         'jumlah' => $item->jumlah

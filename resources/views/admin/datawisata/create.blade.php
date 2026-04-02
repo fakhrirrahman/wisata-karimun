@@ -35,10 +35,13 @@
                 >
                     <option value="">Pilih kategori</option>
                     <option value="Wisata Alam" {{ old('kategori') == 'Wisata Alam' ? 'selected' : '' }}>Wisata Alam</option>
-                    <option value="Wisata Budaya" {{ old('kategori') == 'Wisata Budaya' ? 'selected' : '' }}>Wisata Budaya</option>
+                    <option value="Wisata Bahari" {{ old('kategori') == 'Wisata Bahari' ? 'selected' : '' }}>Wisata Bahari</option>
                     <option value="Wisata Buatan" {{ old('kategori') == 'Wisata Buatan' ? 'selected' : '' }}>Wisata Buatan</option>
-                    <option value="Wisata Kuliner" {{ old('kategori') == 'Wisata Kuliner' ? 'selected' : '' }}>Wisata Kuliner</option>
-                    <option value="Wisata Kerajinan" {{ old('kategori') == 'Wisata Kerajinan' ? 'selected' : '' }}>Wisata Kerajinan</option>
+                    <option value="Cagar Budaya" {{ old('kategori') == 'Cagar Budaya' ? 'selected' : '' }}>Cagar Budaya</option>
+                    <option value="Wisata Belanja" {{ old('kategori') == 'Wisata Belanja' ? 'selected' : '' }}>Wisata Belanja</option>
+                    <option value="Wisata Heritage" {{ old('kategori') == 'Wisata Heritage' ? 'selected' : '' }}>Wisata Heritage</option>
+                    <option value="Wisata Sejarah" {{ old('kategori') == 'Wisata Sejarah' ? 'selected' : '' }}>Wisata Sejarah</option>
+                    <option value="Wisata Budaya" {{ old('kategori') == 'Wisata Budaya' ? 'selected' : '' }}>Wisata Budaya</option>
                 </select>
                 @error('kategori')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
