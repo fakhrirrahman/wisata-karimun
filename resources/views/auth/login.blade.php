@@ -7,7 +7,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gradient-to-br from-blue-600 to-blue-800 min-h-screen flex items-center justify-center">
+<body class="bg-gradient-to-br from-white to-blue-800/60 min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md">
         <!-- Card -->
         <div class="bg-white rounded-lg shadow-2xl p-8">
@@ -98,12 +98,6 @@
                 </div>
             @endif
 
-            <!-- Demo Info -->
-            <div class="mt-6 p-4 bg-blue-50 rounded-lg text-sm text-gray-700">
-                <p class="font-semibold mb-2">Demo Akun:</p>
-                <p>Username: <code class="bg-gray-200 px-2 py-1 rounded">admin</code></p>
-                <p>Password: <code class="bg-gray-200 px-2 py-1 rounded">password</code></p>
-            </div>
         </div>
     </div>
 </body>
