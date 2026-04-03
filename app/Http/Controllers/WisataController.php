@@ -17,7 +17,7 @@ class WisataController extends Controller
 
     public function index()
     {
-        $wisata = Wisata::orderBy('created_at', 'desc')->get();
+        $wisata = Wisata::orderBy('created_at', 'desc')->paginate(10);
         return view('admin.datawisata.index', compact('wisata'));
     }
 

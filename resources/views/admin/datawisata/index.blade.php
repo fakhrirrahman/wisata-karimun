@@ -28,7 +28,7 @@
             <tbody class="divide-y">
                 @forelse($wisata as $key => $item)
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 text-sm text-gray-800">{{ $key + 1 }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-800">{{ $wisata->firstItem() + $key }}</td>
                         <td class="px-6 py-4 text-sm">
                             <div class="flex items-center space-x-3">
                                 @if($item->gambar)
@@ -94,4 +94,10 @@
         </table>
     </div>
 </div>
+
+@if($wisata->hasPages())
+    <div class="mt-4 px-2">
+        {{ $wisata->links() }}
+    </div>
+@endif
 @endsection
