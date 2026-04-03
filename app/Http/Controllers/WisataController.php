@@ -86,9 +86,15 @@ class WisataController extends Controller
             'latitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'longitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'harga' => 'nullable|numeric',
-            'fasilitas' => 'required|array',
+            'fasilitas' => 'required|string',
             'gambar' => 'nullable|image|max:2048',
         ]);
+
+        $fasilitas = $this->normalizeFasilitas($request->fasilitas);
+
+        if (empty($fasilitas)) {
+            return back()->withErrors(['fasilitas' => 'Minimal satu fasilitas harus diisi.'])->withInput();
+        }
 
         $wisata = Wisata::findOrFail($id);
         $wisata->nama = $request->nama;
@@ -99,7 +105,7 @@ class WisataController extends Controller
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
         $wisata->harga = $request->harga;
-        $wisata->fasilitas = $request->fasilitas;
+        $wisata->fasilitas = $fasilitas;
 
         if ($request->hasFile('gambar')) {
             if ($wisata->gambar) {
