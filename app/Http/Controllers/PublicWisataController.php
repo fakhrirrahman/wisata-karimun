@@ -11,9 +11,11 @@ class PublicWisataController extends Controller
 {
     public function index()
     {
+        $totalWisata = Wisata::count();
+
         $wisata = Wisata::select('id', 'nama', 'alamat', 'kategori', 'gambar')
-            ->orderBy('created_at', 'asc')
-            ->get();
+            ->orderBy('nama', 'asc')
+            ->paginate(8);
 
         $mostViewedWisata = Wisata::select('id', 'nama', 'alamat', 'kategori', 'gambar', 'visits')
             ->orderByDesc('visits')
@@ -21,16 +23,7 @@ class PublicWisataController extends Controller
             ->limit(6)
             ->get();
 
-        $ulasanTerbaru = WisataReview::with('wisata:id,nama')
-            ->latest()
-            ->limit(6)
-            ->get();
-
-        $rataRating = (float) WisataReview::avg('rating');
-
-        $totalUlasan = WisataReview::count();
-
-        return view('public.beranda', compact('wisata', 'mostViewedWisata', 'ulasanTerbaru', 'rataRating', 'totalUlasan'));
+        return view('public.beranda', compact('wisata', 'totalWisata', 'mostViewedWisata'));
     }
 
     public function storeUlasan(Request $request)
@@ -44,7 +37,10 @@ class PublicWisataController extends Controller
 
         WisataReview::create($data);
 
-        return redirect()->route('beranda')->with('success', 'Ulasan berhasil dikirim. Terima kasih!');
+        return redirect()
+            ->route('detail', $data['wisata_id'])
+            ->withFragment('ulasan')
+            ->with('success', 'Ulasan berhasil dikirim. Terima kasih!');
     }
 
     public function detail($id)
@@ -85,7 +81,15 @@ class PublicWisataController extends Controller
             })
             ->values();
 
-        return view('public.detail', compact('wisata', 'nearbyPlaces'));
+        $ulasanWisata = WisataReview::where('wisata_id', $wisata->id)
+            ->latest()
+            ->paginate(6, ['*'], 'ulasan_page');
+
+        $rataRatingWisata = (float) WisataReview::where('wisata_id', $wisata->id)->avg('rating');
+
+        $totalUlasanWisata = WisataReview::where('wisata_id', $wisata->id)->count();
+
+        return view('public.detail', compact('wisata', 'nearbyPlaces', 'ulasanWisata', 'rataRatingWisata', 'totalUlasanWisata'));
     }
 
     private function haversineKm(float $lat1, float $lon1, float $lat2, float $lon2): float

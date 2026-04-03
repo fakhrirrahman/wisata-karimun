@@ -97,6 +97,101 @@
                     @endif
                 </div>
 
+                <!-- Ulasan Pengunjung -->
+                <div id="ulasan" class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Ulasan Pengunjung</h2>
+                            <p class="text-gray-600 mt-1">Bagikan pengalaman Anda setelah berkunjung ke {{ $wisata->nama }}.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+                                <p class="text-xs text-yellow-700">Rata-rata Rating</p>
+                                <p class="text-lg font-bold text-yellow-800">{{ number_format($rataRatingWisata ?: 0, 1) }} / 5</p>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                                <p class="text-xs text-blue-700">Total Ulasan</p>
+                                <p class="text-lg font-bold text-blue-800">{{ number_format($totalUlasanWisata) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if(session('success'))
+                        <div class="mb-6 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-800">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700">
+                            <ul class="list-disc pl-5 space-y-1">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <div class="xl:col-span-2 space-y-4">
+                            @forelse($ulasanWisata as $ulasan)
+                                <div class="bg-gray-50 rounded-xl border border-gray-100 p-5">
+                                    <div class="flex items-start justify-between gap-4 mb-2">
+                                        <h3 class="font-semibold text-gray-900">{{ $ulasan->nama_pengulas }}</h3>
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-semibold">
+                                            <i class="fas fa-star mr-1"></i>{{ $ulasan->rating }}/5
+                                        </span>
+                                    </div>
+                                    <p class="text-gray-700 leading-relaxed">{{ $ulasan->ulasan }}</p>
+                                    <p class="text-xs text-gray-400 mt-3">{{ $ulasan->created_at->format('d M Y, H:i') }}</p>
+                                </div>
+                            @empty
+                                <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-600">
+                                    Belum ada ulasan untuk wisata ini. Jadilah yang pertama.
+                                </div>
+                            @endforelse
+
+                            @if($ulasanWisata->hasPages())
+                                <div class="pt-2">
+                                    {{ $ulasanWisata->onEachSide(1)->links() }}
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="bg-gray-50 rounded-xl border border-gray-100 p-5 h-fit">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Tulis Ulasan</h3>
+                            <form action="{{ route('ulasan.store') }}" method="POST" class="space-y-4">
+                                @csrf
+                                <input type="hidden" name="wisata_id" value="{{ $wisata->id }}">
+
+                                <div>
+                                    <label for="nama_pengulas" class="block text-sm font-medium text-gray-700 mb-1">Nama Anda</label>
+                                    <input id="nama_pengulas" name="nama_pengulas" type="text" value="{{ old('nama_pengulas') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Budi" required>
+                                </div>
+
+                                <div>
+                                    <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                                    <select id="rating" name="rating" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                        <option value="">-- Pilih rating --</option>
+                                        @for($i = 5; $i >= 1; $i--)
+                                            <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>{{ $i }} - {{ $i >= 4 ? 'Sangat Baik' : ($i == 3 ? 'Baik' : ($i == 2 ? 'Kurang' : 'Buruk')) }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="ulasan" class="block text-sm font-medium text-gray-700 mb-1">Ulasan</label>
+                                    <textarea id="ulasan" name="ulasan" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tulis pengalaman Anda..." required>{{ old('ulasan') }}</textarea>
+                                </div>
+
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold transition">
+                                    <i class="fas fa-paper-plane mr-2"></i>Kirim Ulasan
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Map -->
                 <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Lokasi di Peta</h2>
