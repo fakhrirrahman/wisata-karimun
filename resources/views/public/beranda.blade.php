@@ -142,6 +142,108 @@
     </div>
 </section>
 
+<!-- Ulasan Section -->
+<section class="py-16 bg-white border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Ulasan Pengunjung</h2>
+                <p class="text-gray-600 mt-2">Bagikan pengalaman Anda setelah mengunjungi destinasi wisata di Karimun.</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+                    <p class="text-xs text-yellow-700">Rata-rata Rating</p>
+                    <p class="text-lg font-bold text-yellow-800">{{ number_format($rataRating ?: 0, 1) }} / 5</p>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+                    <p class="text-xs text-blue-700">Total Ulasan</p>
+                    <p class="text-lg font-bold text-blue-800">{{ number_format($totalUlasan) }}</p>
+                </div>
+            </div>
+        </div>
+
+        @if(session('success'))
+            <div class="mb-6 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-green-800">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700">
+                <ul class="list-disc pl-5 space-y-1">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-4">
+                @forelse($ulasanTerbaru as $ulasan)
+                    <div class="bg-gray-50 rounded-xl border border-gray-100 p-5">
+                        <div class="flex items-start justify-between gap-4 mb-2">
+                            <div>
+                                <h3 class="font-semibold text-gray-900">{{ $ulasan->nama_pengulas }}</h3>
+                                <p class="text-sm text-gray-500">Untuk {{ $ulasan->wisata->nama ?? 'Wisata' }}</p>
+                            </div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-semibold">
+                                <i class="fas fa-star mr-1"></i>{{ $ulasan->rating }}/5
+                            </span>
+                        </div>
+                        <p class="text-gray-700 leading-relaxed">{{ $ulasan->ulasan }}</p>
+                        <p class="text-xs text-gray-400 mt-3">{{ $ulasan->created_at->format('d M Y, H:i') }}</p>
+                    </div>
+                @empty
+                    <div class="bg-gray-50 rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-600">
+                        Belum ada ulasan. Jadilah yang pertama memberi ulasan.
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="bg-gray-50 rounded-xl border border-gray-100 p-6 h-fit">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Kirim Ulasan</h3>
+                <form action="{{ route('ulasan.store') }}" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label for="wisata_id" class="block text-sm font-medium text-gray-700 mb-1">Pilih Wisata</label>
+                        <select id="wisata_id" name="wisata_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">-- Pilih destinasi --</option>
+                            @foreach($wisata as $item)
+                                <option value="{{ $item->id }}" {{ old('wisata_id') == $item->id ? 'selected' : '' }}>{{ $item->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="nama_pengulas" class="block text-sm font-medium text-gray-700 mb-1">Nama Anda</label>
+                        <input id="nama_pengulas" name="nama_pengulas" type="text" value="{{ old('nama_pengulas') }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Contoh: Budi" required>
+                    </div>
+
+                    <div>
+                        <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                        <select id="rating" name="rating" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">-- Pilih rating --</option>
+                            @for($i = 5; $i >= 1; $i--)
+                                <option value="{{ $i }}" {{ old('rating') == $i ? 'selected' : '' }}>{{ $i }} - {{ $i >= 4 ? 'Sangat Baik' : ($i == 3 ? 'Baik' : ($i == 2 ? 'Kurang' : 'Buruk')) }}</option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="ulasan" class="block text-sm font-medium text-gray-700 mb-1">Ulasan</label>
+                        <textarea id="ulasan" name="ulasan" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Tulis pengalaman Anda..." required>{{ old('ulasan') }}</textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-semibold transition">
+                        <i class="fas fa-paper-plane mr-2"></i>Kirim Ulasan
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Wisata List Section -->
 <section class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

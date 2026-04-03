@@ -44,6 +44,11 @@ class Wisata extends Model
         return $this->hasMany(WisataNearbyPlace::class);
     }
 
+    public function reviews()
+    {
+        return $this->hasMany(WisataReview::class);
+    }
+
     /**
      * Increment jumlah visits
      */

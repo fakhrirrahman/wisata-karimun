@@ -25,8 +25,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('tes12345'),
         ]);
 
-        $this->call(
-            wisataKunjunganSeeder::class
-        );
+        $this->call([
+            wisataKunjunganSeeder::class,
+            WisataReviewSeeder::class,
+        ]);
     }
 }

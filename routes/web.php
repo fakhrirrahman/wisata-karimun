@@ -14,6 +14,7 @@ Route::get('/', [PublicWisataController::class, 'index'])->name('beranda');
 Route::get('/detail/{id}', [PublicWisataController::class, 'detail'])->name('detail');
 Route::get('/peta', [PublicWisataController::class, 'peta'])->name('peta');
 Route::get('/api/wisata/all', [PublicWisataController::class, 'apiGetAllWisata'])->name('api.wisata.all');
+Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ulasan.store');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');

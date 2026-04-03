@@ -19,8 +19,8 @@
     </div>
 
     <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-gray-500 text-xs mb-1">Kecamatan</p>
-        <p class="text-2xl font-bold text-gray-800">{{ $kecamatanCount->count() }}</p>
+        <p class="text-gray-500 text-xs mb-1">Total Kunjungan</p>
+        <p class="text-2xl font-bold text-gray-800">{{ number_format($totalKunjungan) }}</p>
         <i class="fas fa-city text-purple-500 text-2xl opacity-20 float-right"></i>
     </div>
 

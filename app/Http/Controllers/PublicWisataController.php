@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Wisata;
 use App\Models\WisataVisit;
+use App\Models\WisataReview;
 
 class PublicWisataController extends Controller
 {
@@ -20,7 +21,30 @@ class PublicWisataController extends Controller
             ->limit(6)
             ->get();
 
-        return view('public.beranda', compact('wisata', 'mostViewedWisata'));
+        $ulasanTerbaru = WisataReview::with('wisata:id,nama')
+            ->latest()
+            ->limit(6)
+            ->get();
+
+        $rataRating = (float) WisataReview::avg('rating');
+
+        $totalUlasan = WisataReview::count();
+
+        return view('public.beranda', compact('wisata', 'mostViewedWisata', 'ulasanTerbaru', 'rataRating', 'totalUlasan'));
+    }
+
+    public function storeUlasan(Request $request)
+    {
+        $data = $request->validate([
+            'wisata_id' => 'required|exists:wisata,id',
+            'nama_pengulas' => 'required|string|max:255',
+            'rating' => 'required|integer|min:1|max:5',
+            'ulasan' => 'required|string|min:10|max:1000',
+        ]);
+
+        WisataReview::create($data);
+
+        return redirect()->route('beranda')->with('success', 'Ulasan berhasil dikirim. Terima kasih!');
     }
 
     public function detail($id)
