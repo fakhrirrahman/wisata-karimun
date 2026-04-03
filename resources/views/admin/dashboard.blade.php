@@ -13,8 +13,8 @@
     </div>
 
     <div class="bg-white rounded-lg shadow p-4">
-        <p class="text-gray-500 text-xs mb-1">Kategori</p>
-        <p class="text-2xl font-bold text-gray-800">{{ $kategoriCount->count() }}</p>
+        <p class="text-gray-500 text-xs mb-1">Total Ulasan</p>
+        <p class="text-2xl font-bold text-gray-800">{{ number_format($totalUlasan) }}</p>
         <i class="fas fa-th text-green-500 text-2xl opacity-20 float-right"></i>
     </div>
 

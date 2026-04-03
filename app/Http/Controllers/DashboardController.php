@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Wisata;
 use App\Models\WisataVisit;
+use App\Models\WisataReview;
 
 class DashboardController extends Controller
 {
@@ -19,6 +20,9 @@ class DashboardController extends Controller
         $kategoriCount = Wisata::selectRaw('kategori, COUNT(*) as total')
             ->groupBy('kategori')
             ->get();
+
+        // Total ulasan dari semua wisata
+        $totalUlasan = (int) WisataReview::count();
 
         // Total kunjungan dari kolom agregat wisata
         $totalKunjungan = (int) Wisata::sum('visits');
@@ -65,7 +69,7 @@ class DashboardController extends Controller
             ->with('wisata:id,nama,kategori,alamat')
             ->get();
 
-        return view('admin.dashboard', compact('wisataData', 'kategoriCount', 'totalKunjungan', 'wisataPerTahun', 'tahunTersedia', 'kunjunganPerWisata', 'wisataDetailPerTahun'));
+        return view('admin.dashboard', compact('wisataData', 'kategoriCount', 'totalUlasan', 'totalKunjungan', 'wisataPerTahun', 'tahunTersedia', 'kunjunganPerWisata', 'wisataDetailPerTahun'));
     }
 
     // Method untuk mendapatkan data kunjungan wisata per bulan berdasarkan tahun (untuk AJAX)

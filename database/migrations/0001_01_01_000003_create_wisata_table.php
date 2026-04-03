@@ -22,6 +22,8 @@ return new class extends Migration {
             $table->integer('harga')->nullable();
             $table->text('fasilitas')->nullable();
             $table->string('gambar', 255)->nullable();
+            $table->integer('visits')->default(0);
+            $table->timestamp('last_visited_at')->nullable();
             $table->timestamps();
         });
     }

@@ -22,12 +22,11 @@ class DatabaseSeeder extends Seeder
             'username' => 'tes',
         ], [
             'nama' => 'Test User',
-            'password' => Hash::make('tes12345'),
+            'password' => Hash::make('1'),
         ]);
 
         $this->call([
             wisataKunjunganSeeder::class,
-            WisataReviewSeeder::class,
         ]);
     }
 }
