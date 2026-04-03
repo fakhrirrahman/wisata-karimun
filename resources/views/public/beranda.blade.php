@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- Hero Section -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+<section class="bg-linear-to-r from-blue-600 to-blue-800 text-white py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 gap-12 items-center">
             <div>
@@ -143,16 +143,25 @@
 </section>
 
 <!-- Wisata List Section -->
-<section class="py-16 bg-white">
+<section class="py-16 bg-slate-50 border-y border-slate-200/70">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5 mb-10">
             <div>
-                <h2 class="text-3xl font-bold text-gray-800">Daftar Wisata</h2>
-                <p class="text-gray-600 mt-2">
+                <p class="text-xs tracking-[0.2em] uppercase text-blue-700 font-bold mb-2">Eksplorasi Destinasi</p>
+                <h2 class="text-3xl font-bold text-slate-900">Daftar Wisata</h2>
+                <p class="text-slate-600 mt-2">
                     Menampilkan {{ $wisata->firstItem() ?? 0 }}-{{ $wisata->lastItem() ?? 0 }} dari {{ number_format($wisata->total()) }} destinasi.
                 </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+                        <i class="fas fa-compass mr-2 text-blue-600"></i>Total {{ number_format($wisata->total()) }} Wisata
+                    </span>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-700">
+                        <i class="fas fa-layer-group mr-2 text-blue-600"></i>Halaman {{ $wisata->currentPage() }} dari {{ $wisata->lastPage() }}
+                    </span>
+                </div>
             </div>
-            <a href="{{ route('peta') }}" class="inline-flex items-center px-4 py-2 rounded-lg border border-blue-200 bg-blue-50 text-blue-700 text-sm font-semibold hover:bg-blue-100 transition w-fit">
+            <a href="{{ route('peta') }}" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm w-fit">
                 <i class="fas fa-map mr-2"></i>Lihat Semua di Peta
             </a>
         </div>
@@ -163,42 +172,75 @@
                 <p class="text-gray-500 text-xl">Belum ada data wisata tersedia</p>
             </div>
         @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 @foreach($wisata as $item)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition group">
-                        <div class="relative h-32 overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
+                        <div class="relative h-36 overflow-hidden bg-slate-200 flex items-center justify-center">
                             @if($item->gambar)
-                                <img src="{{ Storage::url($item->gambar) }}" alt="{{ $item->nama }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                                <img src="{{ Storage::url($item->gambar) }}" alt="{{ $item->nama }}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                             @else
-                                <i class="fas fa-image text-gray-400 text-4xl"></i>
+                                <i class="fas fa-image text-slate-400 text-4xl"></i>
                             @endif
+                            <div class="absolute inset-0 bg-linear-to-t from-slate-900/45 via-slate-900/10 to-transparent"></div>
+                            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 text-slate-700 text-[11px] font-semibold border border-white">
+                                {{ $item->kategori }}
+                            </span>
                         </div>
                         
                         <div class="p-4">
-                            <div class="flex justify-between items-start gap-2 mb-2">
-                                <h3 class="text-sm font-semibold text-gray-800 leading-5">{{ \Illuminate\Support\Str::limit($item->nama, 42) }}</h3>
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 text-[11px] font-semibold rounded whitespace-nowrap">
-                                    {{ $item->kategori }}
-                                </span>
-                            </div>
+                            <h3 class="text-sm font-bold text-slate-900 leading-5 min-h-10">{{ \Illuminate\Support\Str::limit($item->nama, 42) }}</h3>
                             
-                            <p class="text-xs text-gray-600 mb-3">
-                                <i class="fas fa-map-marker-alt mr-2"></i>{{ $item->alamat }}
+                            <p class="text-xs text-slate-600 mt-2 mb-3 flex items-start">
+                                <i class="fas fa-map-marker-alt mt-0.5 mr-2 text-rose-500"></i>
+                                <span>{{ \Illuminate\Support\Str::limit($item->alamat, 38) }}</span>
                             </p>
                             
-                            <div class="border-t pt-3">
-                                <a href="{{ route('detail', $item->id) }}" class="block text-center bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition font-semibold text-sm">
-                                    <i class="fas fa-eye mr-1"></i>Lihat Detail
+                            <div class="border-t border-slate-200 pt-3 flex items-center justify-between gap-2">
+                                <a href="{{ route('detail', $item->id) }}" class="inline-flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition font-semibold text-sm">
+                                    <i class="fas fa-eye mr-1.5"></i>Detail
                                 </a>
                             </div>
                         </div>
-                    </div>
+                    </article>
                 @endforeach
             </div>
 
             @if($wisata->hasPages())
-                <div class="mt-8">
-                    {{ $wisata->onEachSide(1)->links() }}
+                @php
+                    $currentPage = $wisata->currentPage();
+                    $lastPage = $wisata->lastPage();
+                    $startPage = max(1, $currentPage - 2);
+                    $endPage = min($lastPage, $currentPage + 2);
+                @endphp
+
+                <div class="mt-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <p class="text-sm text-slate-600">
+                        Menampilkan <span class="font-semibold text-slate-800">{{ $wisata->firstItem() ?? 0 }}</span>
+                        sampai <span class="font-semibold text-slate-800">{{ $wisata->lastItem() ?? 0 }}</span>
+                        dari <span class="font-semibold text-slate-800">{{ number_format($wisata->total()) }}</span> hasil
+                    </p>
+
+                    <nav class="inline-flex items-center rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                        @if($wisata->onFirstPage())
+                            <span class="px-3 py-2 text-slate-300"><i class="fas fa-chevron-left"></i></span>
+                        @else
+                            <a href="{{ $wisata->previousPageUrl() }}" class="px-3 py-2 text-slate-600 hover:bg-slate-100"><i class="fas fa-chevron-left"></i></a>
+                        @endif
+
+                        @for($page = $startPage; $page <= $endPage; $page++)
+                            @if($page == $currentPage)
+                                <span class="min-w-9 text-center px-3 py-2 bg-blue-600 text-white text-sm font-semibold">{{ $page }}</span>
+                            @else
+                                <a href="{{ $wisata->url($page) }}" class="min-w-9 text-center px-3 py-2 text-slate-700 text-sm hover:bg-slate-100">{{ $page }}</a>
+                            @endif
+                        @endfor
+
+                        @if($wisata->hasMorePages())
+                            <a href="{{ $wisata->nextPageUrl() }}" class="px-3 py-2 text-slate-600 hover:bg-slate-100"><i class="fas fa-chevron-right"></i></a>
+                        @else
+                            <span class="px-3 py-2 text-slate-300"><i class="fas fa-chevron-right"></i></span>
+                        @endif
+                    </nav>
                 </div>
             @endif
         @endif
