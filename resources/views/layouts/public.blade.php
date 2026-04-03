@@ -62,7 +62,6 @@
                         <ul class="space-y-2 text-gray-400">
                             <li><a href="{{ route('beranda') }}" class="hover:text-white">Beranda</a></li>
                             <li><a href="{{ route('peta') }}" class="hover:text-white">Peta Wisata</a></li>
-                            <li><a href="{{ route('peta-kecamatan') }}" class="hover:text-white">Peta Kecamatan</a></li>
                         </ul>
                     </div>
                     <div>

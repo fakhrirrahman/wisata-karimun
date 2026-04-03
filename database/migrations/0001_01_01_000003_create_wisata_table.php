@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->string('latitude', 255);
             $table->string('longitude', 255);
             $table->integer('harga')->nullable();
-            $table->json('fasilitas')->nullable();
+            $table->text('fasilitas')->nullable();
             $table->string('gambar', 255)->nullable();
             $table->timestamps();
         });

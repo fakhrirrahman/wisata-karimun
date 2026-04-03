@@ -24,5 +24,8 @@ class DatabaseSeeder extends Seeder
             'username' => 'tes',
             'password' => Hash::make('tes12345'),
         ]);
+        $this->call(
+            wisataKunjunganSeeder::class
+        );
     }
 }

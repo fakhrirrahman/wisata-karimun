@@ -167,25 +167,15 @@
 
         <!-- Fasilitas -->
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Fasilitas *</label>
-            <div class="space-y-2">
-                @php
-                    $fasilitas_list = ['Mushola', 'Tempat Makan', 'Toilet', 'Parkir', 'Kamar Bilas', 'Toko Souvenir', 'Pengamanan'];
-                    $old_fasilitas = old('fasilitas') ?? [];
-                @endphp
-                @foreach($fasilitas_list as $f)
-                    <label class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            name="fasilitas[]"
-                            value="{{ $f }}"
-                            {{ in_array($f, $old_fasilitas) ? 'checked' : '' }}
-                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        >
-                        <span class="ml-2 text-gray-700">{{ $f }}</span>
-                    </label>
-                @endforeach
-            </div>
+            <label for="fasilitas" class="block text-sm font-medium text-gray-700 mb-2">Fasilitas *</label>
+            <textarea 
+                id="fasilitas" 
+                name="fasilitas"
+                rows="4"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none @error('fasilitas') border-red-500 @enderror"
+                placeholder="Contoh: Mushola, Toilet, Parkir"
+                required
+            >{{ old('fasilitas') }}</textarea>
             @error('fasilitas')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
         </div>
 

@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Storage;
 
 class WisataController extends Controller
 {
+    private function normalizeFasilitas($value): array
+    {
+        $lines = preg_split('/[\r\n,]+/', (string) $value) ?: [];
+
+        return array_values(array_filter(array_map('trim', $lines), fn ($item) => $item !== ''));
+    }
+
     public function index()
     {
         $wisata = Wisata::orderBy('created_at', 'desc')->get();
@@ -30,9 +37,15 @@ class WisataController extends Controller
             'latitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'longitude' => 'required|regex:/^-?\d+(\.\d+)?$/',
             'harga' => 'nullable|numeric',
-            'fasilitas' => 'required|array',
+            'fasilitas' => 'required|string',
             'gambar' => 'required|image|max:2048',
         ]);
+
+        $fasilitas = $this->normalizeFasilitas($request->fasilitas);
+
+        if (empty($fasilitas)) {
+            return back()->withErrors(['fasilitas' => 'Minimal satu fasilitas harus diisi.'])->withInput();
+        }
 
         $wisata = new Wisata();
         $wisata->nama = $request->nama;
@@ -43,7 +56,7 @@ class WisataController extends Controller
         $wisata->latitude = $request->latitude;
         $wisata->longitude = $request->longitude;
         $wisata->harga = $request->harga;
-        $wisata->fasilitas = $request->fasilitas;
+        $wisata->fasilitas = $fasilitas;
 
         if ($request->hasFile('gambar')) {
             $imagePath = $request->file('gambar')->storeAs('wisata_images', 
