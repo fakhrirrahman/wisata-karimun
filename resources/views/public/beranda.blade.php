@@ -58,26 +58,6 @@
     </div>
 </section>
 
-<!-- Kategori Section -->
-<section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Kategori Wisata</h2>
-        <div class="grid grid-cols-5 gap-4">
-            @php
-                $kategori = ['Wisata Alam', 'Wisata Budaya', 'Wisata Buatan', 'Wisata Kuliner', 'Wisata Kerajinan'];
-                $icons = ['fa-leaf', 'fa-landmark', 'fa-building', 'fa-utensils', 'fa-hammer'];
-                $colors = ['green', 'blue', 'purple', 'orange', 'red'];
-            @endphp
-            @foreach($kategori as $key => $kat)
-                <div class="bg-white rounded-lg p-6 text-center hover:shadow-lg transition">
-                    <i class="fas {{ $icons[$key] }} text-4xl text-{{ $colors[$key] }}-500 mb-4 block"></i>
-                    <h3 class="font-semibold text-gray-800">{{ $kat }}</h3>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
-
 <!-- Most View Section -->
 <section class="py-16 bg-gray-50 border-y border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
