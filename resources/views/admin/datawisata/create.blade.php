@@ -42,6 +42,7 @@
                     <option value="Wisata Heritage" {{ old('kategori') == 'Wisata Heritage' ? 'selected' : '' }}>Wisata Heritage</option>
                     <option value="Wisata Sejarah" {{ old('kategori') == 'Wisata Sejarah' ? 'selected' : '' }}>Wisata Sejarah</option>
                     <option value="Wisata Budaya" {{ old('kategori') == 'Wisata Budaya' ? 'selected' : '' }}>Wisata Budaya</option>
+                    <option value="Wisata Kuliner" {{ old('kategori') == 'Wisata Kuliner' ? 'selected' : '' }}>Wisata Kuliner</option>
                 </select>
                 @error('kategori')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
             </div>
