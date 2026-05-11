@@ -58,12 +58,29 @@ class WisataKunjunganController extends Controller
      */
     public function statistik()
     {
-        $kategoriStats = Wisata::select('kategori', DB::raw('SUM(visits) as total_visits, COUNT(*) as jumlah_wisata'))
-            ->groupBy('kategori')
+        $normalisasiKategori = "
+            CASE
+                WHEN kategori IN ('Alam', 'Wisata Alam') THEN 'Wisata Alam'
+                WHEN kategori IN ('Bahari', 'Wisata Bahari') THEN 'Wisata Bahari'
+                WHEN kategori IN ('Buatan', 'Wisata Buatan') THEN 'Wisata Buatan'
+                WHEN kategori IN ('Belanja', 'Wisata Belanja') THEN 'Wisata Belanja'
+                WHEN kategori IN ('Heritage', 'Wisata Heritage') THEN 'Wisata Heritage'
+                WHEN kategori IN ('Sejarah', 'Wisata Sejarah') THEN 'Wisata Sejarah'
+                WHEN kategori IN ('Budaya', 'Wisata Budaya') THEN 'Wisata Budaya'
+                WHEN kategori IN ('Kuliner', 'Wisata Kuliner') THEN 'Wisata Kuliner'
+                ELSE kategori
+            END
+        ";
+
+        $kategoriStats = Wisata::select(
+                DB::raw("($normalisasiKategori) as kategori"),
+                DB::raw('SUM(visits) as total_visits, COUNT(*) as jumlah_wisata')
+            )
+            ->groupByRaw($normalisasiKategori)
             ->orderByDesc('total_visits')
             ->get();
 
-        $topWisata = Wisata::select('nama', 'kategori', 'visits')
+        $topWisata = Wisata::select('nama', DB::raw("($normalisasiKategori) as kategori"), 'visits')
             ->orderByDesc('visits')
             ->limit(10)
             ->get();
