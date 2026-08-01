@@ -19,6 +19,16 @@ Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ul
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
+Route::get('/debug', function () {
+    return [
+        'app_url' => config('app.url'),
+        'scheme' => request()->getScheme(),
+        'secure' => request()->isSecure(),
+        'host' => request()->getHost(),
+        'url' => url('/'),
+    ];
+});
+
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
