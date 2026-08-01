@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PublicWisataController;
+use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\WisataController;
 use App\Http\Controllers\WisataKunjunganController;
 use App\Http\Controllers\WisataNearbyPlaceController;
-use App\Http\Controllers\UserProfileController;
-use App\Http\Controllers\PublicWisataController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 // Public Routes
 Route::get('/', [PublicWisataController::class, 'index'])->name('beranda');
@@ -19,17 +20,9 @@ Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ul
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
-Route::get('/debug', function () {
-    return [
-        'app_url' => config('app.url'),
-        'scheme' => request()->getScheme(),
-        'secure' => request()->isSecure(),
-        'host' => request()->getHost(),
-        'url' => url('/'),
-    ];
-});
-
-Route::middleware('auth')->group(function () {
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+});Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/wisata-per-bulan', [DashboardController::class, 'getWisataPerBulan'])->name('dashboard.wisata-per-bulan');
