@@ -20,9 +20,7 @@ Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ul
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 
-Route::get('/storage-link', function () {
-    Artisan::call('storage:link');
-});Route::middleware('auth')->group(function () {
+Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/wisata-per-bulan', [DashboardController::class, 'getWisataPerBulan'])->name('dashboard.wisata-per-bulan');
