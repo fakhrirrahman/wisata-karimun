@@ -41,11 +41,11 @@
                         <p class="text-gray-600">Destinasi Wisata</p>
                     </div>
                     <div class="text-center">
-                        <p class="text-3xl font-bold text-green-600">5</p>
+                        <p class="text-3xl font-bold text-green-600">{{ number_format($totalKecamatan) }}</p>
                         <p class="text-gray-600">Kecamatan</p>
                     </div>
                     <div class="text-center">
-                        <p class="text-3xl font-bold text-purple-600">5</p>
+                        <p class="text-3xl font-bold text-purple-600">{{ number_format($totalKategori) }}</p>
                         <p class="text-gray-600">Kategori Wisata</p>
                     </div>
                     <div class="text-center">

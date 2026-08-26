@@ -12,6 +12,14 @@ class PublicWisataController extends Controller
     public function index()
     {
         $totalWisata = Wisata::count();
+        $totalKecamatan = Wisata::whereNotNull('kecamatan')
+            ->where('kecamatan', '!=', '')
+            ->distinct('kecamatan')
+            ->count('kecamatan');
+        $totalKategori = Wisata::whereNotNull('kategori')
+            ->where('kategori', '!=', '')
+            ->distinct('kategori')
+            ->count('kategori');
 
         $wisata = Wisata::select('id', 'nama', 'alamat', 'kategori', 'gambar')
             ->orderBy('nama', 'asc')
@@ -23,7 +31,7 @@ class PublicWisataController extends Controller
             ->limit(6)
             ->get();
 
-        return view('public.beranda', compact('wisata', 'totalWisata', 'mostViewedWisata'));
+        return view('public.beranda', compact('wisata', 'totalWisata', 'totalKecamatan', 'totalKategori', 'mostViewedWisata'));
     }
 
     public function storeUlasan(Request $request)
