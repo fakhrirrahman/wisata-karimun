@@ -72,47 +72,39 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('wisataData', 'kategoriCount', 'totalUlasan', 'totalKunjungan', 'wisataPerTahun', 'tahunTersedia', 'kunjunganPerWisata', 'wisataDetailPerTahun'));
     }
 
-    // Method untuk mendapatkan data kunjungan wisata per bulan berdasarkan tahun (untuk AJAX)
-    public function getWisataPerBulan(Request $request)
+    // Method untuk mendapatkan data kunjungan wisata per hari berdasarkan bulan dan tahun (untuk AJAX)
+    public function getWisataPerHari(Request $request)
     {
         $tahun = $request->get('tahun', date('Y'));
+        $bulan = $request->get('bulan', date('n'));
 
-        $wisataPerBulan = WisataVisit::selectRaw('MONTH(visited_at) as bulan, COUNT(*) as total')
+        $wisataPerHariRaw = WisataVisit::selectRaw('DAY(visited_at) as hari, COUNT(*) as total')
             ->whereYear('visited_at', $tahun)
-            ->groupBy('bulan')
-            ->orderBy('bulan', 'asc')
-            ->get()
-            ->map(function ($item) {
-                $namaBulan = [
-                    1 => 'Januari',
-                    2 => 'Februari',
-                    3 => 'Maret',
-                    4 => 'April',
-                    5 => 'Mei',
-                    6 => 'Juni',
-                    7 => 'Juli',
-                    8 => 'Agustus',
-                    9 => 'September',
-                    10 => 'Oktober',
-                    11 => 'November',
-                    12 => 'Desember'
-                ];
-                return [
-                    'bulan' => $namaBulan[$item->bulan],
-                    'bulan_number' => $item->bulan,
-                    'total' => $item->total
-                ];
-            });
+            ->whereMonth('visited_at', $bulan)
+            ->groupBy('hari')
+            ->pluck('total', 'hari')
+            ->toArray();
 
-        // Detail wisata per bulan
-        $wisataDetailPerBulan = WisataVisit::selectRaw('MONTH(visited_at) as bulan, wisata_id, COUNT(*) as jumlah')
+        $daysInMonth = \Carbon\Carbon::createFromDate($tahun, $bulan)->daysInMonth;
+
+        $wisataPerHari = [];
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $wisataPerHari[] = [
+                'hari' => $i,
+                'total' => $wisataPerHariRaw[$i] ?? 0
+            ];
+        }
+
+        // Detail wisata per hari
+        $wisataDetailPerHari = WisataVisit::selectRaw('DAY(visited_at) as hari, wisata_id, COUNT(*) as jumlah')
             ->whereYear('visited_at', $tahun)
+            ->whereMonth('visited_at', $bulan)
             ->with('wisata:id,nama')
-            ->groupBy('bulan', 'wisata_id')
-            ->orderBy('bulan', 'asc')
+            ->groupBy('hari', 'wisata_id')
+            ->orderBy('hari', 'asc')
             ->orderBy('jumlah', 'desc')
             ->get()
-            ->groupBy('bulan')
+            ->groupBy('hari')
             ->map(function ($items) {
                 return $items->take(5)->map(function ($item) {
                     return [
@@ -123,8 +115,8 @@ class DashboardController extends Controller
             });
 
         return response()->json([
-            'data' => $wisataPerBulan,
-            'details' => $wisataDetailPerBulan
+            'data' => $wisataPerHari,
+            'details' => $wisataDetailPerHari
         ]);
     }
 }

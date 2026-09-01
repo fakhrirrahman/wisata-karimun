@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicWisataController::class, 'index'])->name('beranda');
 Route::get('/detail/{id}', [PublicWisataController::class, 'detail'])->name('detail');
 Route::get('/peta', [PublicWisataController::class, 'peta'])->name('peta');
+Route::get('/peta-kunjungan', [PublicWisataController::class, 'petaKunjungan'])->name('peta-kunjungan');
+Route::get('/api/kunjungan/heatmap', [PublicWisataController::class, 'apiGetHeatmapKunjungan'])->name('api.kunjungan.heatmap');
 Route::get('/api/wisata/all', [PublicWisataController::class, 'apiGetAllWisata'])->name('api.wisata.all');
 Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ulasan.store');
 
@@ -23,7 +25,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/wisata-per-bulan', [DashboardController::class, 'getWisataPerBulan'])->name('dashboard.wisata-per-bulan');
+    Route::get('/dashboard/wisata-per-hari', [DashboardController::class, 'getWisataPerHari'])->name('dashboard.wisata-per-hari');
 
     // Wisata Management
     Route::prefix('datawisata')->name('datawisata.')->group(function () {
@@ -48,6 +50,8 @@ Route::middleware('auth')->group(function () {
     // Kunjungan Management
     Route::prefix('kunjungan')->name('kunjungan.')->group(function () {
         Route::get('/', [WisataKunjunganController::class, 'index'])->name('index');
+        Route::get('/create', [WisataKunjunganController::class, 'create'])->name('create');
+        Route::post('/', [WisataKunjunganController::class, 'store'])->name('store');
         Route::get('/statistik', [WisataKunjunganController::class, 'statistik'])->name('statistik');
         Route::get('/{id}', [WisataKunjunganController::class, 'show'])->name('show');
         Route::put('/{id}/reset', [WisataKunjunganController::class, 'resetVisits'])->name('reset');

@@ -7,9 +7,14 @@
 <div class="mb-8">
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-2xl font-bold text-gray-800">Statistik Kunjungan Wisata</h3>
-        <a href="{{ route('kunjungan.statistik') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition">
-            <i class="fas fa-chart-pie mr-2"></i>Analisis Statistik
-        </a>
+        <div class="flex space-x-3">
+            <a href="{{ route('kunjungan.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                <i class="fas fa-plus mr-2"></i> Tambah Data Kunjungan
+            </a>
+            <a href="{{ route('kunjungan.statistik') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+                <i class="fas fa-chart-pie mr-2"></i> Analisis Statistik
+            </a>
+        </div>
     </div>
 
     <!-- Summary Cards -->

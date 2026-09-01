@@ -135,11 +135,62 @@ class PublicWisataController extends Controller
         return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahWisataPerKecamatan'));
     }
 
+    public function petaKunjungan(Request $request)
+    {
+        $selectedKecamatans = $request->input('kecamatan', []);
+        
+        // Filter wisata berdasarkan kecamatan jika ada yang dipilih
+        $query = Wisata::query();
+        
+        if (!empty($selectedKecamatans) && !in_array('all', $selectedKecamatans)) {
+            $query->whereIn('kecamatan', $selectedKecamatans);
+        }
+        
+        $wisata = $query->get();
+
+        // Hitung total kunjungan per kecamatan langsung dari database
+        $jumlahKunjunganPerKecamatan = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, sum(visits) as total')
+            ->groupBy('kecamatan')
+            ->pluck('total', 'kec')
+            ->toArray();
+
+        return view('public.peta-kunjungan', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan'));
+    }
+
     public function apiGetAllWisata()
     {
         $wisata = Wisata::select('id', 'nama', 'kategori', 'latitude', 'longitude', 'fasilitas')
             ->get();
 
         return response()->json($wisata);
+    }
+
+    public function apiGetHeatmapKunjungan(Request $request)
+    {
+        $bulan = $request->input('bulan', 'all');
+        $tahun = $request->input('tahun', 'all');
+
+        if ($bulan === 'all' && $tahun === 'all') {
+            $data = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, sum(visits) as total')
+                ->groupBy('kecamatan')
+                ->pluck('total', 'kec')
+                ->toArray();
+        } else {
+            $visitQuery = \App\Models\WisataVisit::join('wisata', 'wisata_visits.wisata_id', '=', 'wisata.id')
+                ->selectRaw('UPPER(wisata.kecamatan) as kec, count(wisata_visits.id) as total');
+
+            if ($bulan !== 'all') {
+                $visitQuery->whereMonth('wisata_visits.visited_at', $bulan);
+            }
+            if ($tahun !== 'all') {
+                $visitQuery->whereYear('wisata_visits.visited_at', $tahun);
+            }
+
+            $data = $visitQuery->groupBy('wisata.kecamatan')
+                ->pluck('total', 'kec')
+                ->toArray();
+        }
+
+        return response()->json($data);
     }
 }

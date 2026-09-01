@@ -22,6 +22,93 @@ class WisataKunjunganController extends Controller
     }
 
     /**
+     * Tampilkan form tambah kunjungan manual
+     */
+    public function create()
+    {
+        $wisata = Wisata::orderBy('nama')->get(['id', 'nama']);
+        return view('admin.kunjungan.create', compact('wisata'));
+    }
+
+    /**
+     * Simpan data kunjungan manual
+     */
+    public function store(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'wisata_id' => 'required|exists:wisata,id',
+            'tahun' => 'required|integer|min:2000|max:' . date('Y'),
+            'bulan' => 'required|integer|min:1|max:12',
+            'jumlah_kunjungan' => 'required|integer|min:1|max:10000',
+        ]);
+
+        $wisata = Wisata::findOrFail($request->wisata_id);
+        
+        $jumlah = $request->jumlah_kunjungan;
+        $tahun = $request->tahun;
+        $bulan = $request->bulan;
+        
+        $visits = [];
+        
+        for ($i = 0; $i < $jumlah; $i++) {
+            $daysInMonth = \Carbon\Carbon::createFromDate($tahun, $bulan)->daysInMonth;
+            // Generate valid random date up to current date if it's the current year and month
+            $currentYear = date('Y');
+            $currentMonth = date('n');
+            $currentDay = date('j');
+            
+            $maxDay = $daysInMonth;
+            if ($tahun == $currentYear && $bulan == $currentMonth) {
+                $maxDay = $currentDay;
+            }
+            
+            $randomDay = rand(1, $maxDay);
+            $randomHour = rand(8, 17);
+            $randomMinute = rand(0, 59);
+            $randomSecond = rand(0, 59);
+            
+            $visitedAt = \Carbon\Carbon::create($tahun, $bulan, $randomDay, $randomHour, $randomMinute, $randomSecond);
+            
+            // Prevent future dates
+            if ($visitedAt->isFuture()) {
+                $visitedAt = now();
+            }
+            
+            $visits[] = [
+                'wisata_id' => $wisata->id,
+                'user_id' => null,
+                'ip_address' => '127.0.0.1', // Manual entry
+                'visited_at' => $visitedAt,
+            ];
+            
+            // Batch insert to avoid memory issues and query limits
+            if (count($visits) >= 1000) {
+                WisataVisit::insert($visits);
+                $visits = [];
+            }
+        }
+        
+        if (count($visits) > 0) {
+            WisataVisit::insert($visits);
+        }
+        
+        // Update aggregated visits count
+        $wisata->increment('visits', $jumlah);
+        
+        // Update last_visited_at
+        $latestVisitDate = \Carbon\Carbon::create($tahun, $bulan)->endOfMonth();
+        if ($latestVisitDate->isFuture()) {
+            $latestVisitDate = now();
+        }
+        
+        if (!$wisata->last_visited_at || $latestVisitDate->greaterThan($wisata->last_visited_at)) {
+            $wisata->update(['last_visited_at' => $latestVisitDate]);
+        }
+        
+        return redirect()->route('kunjungan.index')->with('success', 'Data kunjungan berhasil ditambahkan.');
+    }
+
+    /**
      * Tampilkan detail kunjungan per wisata
      */
     public function show($id)
