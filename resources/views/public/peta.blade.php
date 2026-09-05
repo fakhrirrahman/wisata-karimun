@@ -43,6 +43,39 @@
                 </select>
             </div>
 
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Bulan</label>
+                <select id="bulanSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
+                    <option value="all">Semua Bulan</option>
+                    <option value="1">Januari</option>
+                    <option value="2">Februari</option>
+                    <option value="3">Maret</option>
+                    <option value="4">April</option>
+                    <option value="5">Mei</option>
+                    <option value="6">Juni</option>
+                    <option value="7">Juli</option>
+                    <option value="8">Agustus</option>
+                    <option value="9">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Desember</option>
+                </select>
+            </div>
+
+            <div class="flex-1 min-w-[150px]">
+                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Tahun</label>
+                <select id="tahunSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
+                    <option value="all">Semua Tahun</option>
+                    @php
+                        $startYear = 2020;
+                        $currentYear = date('Y');
+                    @endphp
+                    @for ($y = $currentYear; $y >= $startYear; $y--)
+                        <option value="{{ $y }}">{{ $y }}</option>
+                    @endfor
+                </select>
+            </div>
+
             <div>
                 <button id="resetFilterBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition text-sm font-semibold h-[38px]">
                     Reset Filter
@@ -159,6 +192,8 @@
                 zoomControl: false 
             });
             L.control.zoom({ position: 'topleft' }).addTo(map);
+            map.createPane('heatmapPane');
+            map.getPane('heatmapPane').style.zIndex = 450;
 
             const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
@@ -178,14 +213,15 @@
             /* ================== STATE & LAYERS ================== */
             const wisataLayerGroup = L.layerGroup().addTo(map);
             const batasKecamatanGroup = L.layerGroup().addTo(map); // Menyala by default
-            const heatmapGroup = L.layerGroup(); // Mati by default (dicentang lewat overlay)
+            const heatmapGroup = L.layerGroup().addTo(map); // Heatmap kunjungan tampil default
             
             let markerMap = {};
-            let jumlahWisataPerKecamatan = {!! json_encode($jumlahWisataPerKecamatan ?? []) !!};
+            let jumlahKunjunganPerKecamatan = {!! json_encode($jumlahKunjunganPerKecamatan ?? []) !!};
+            let heatmapKunjunganPoints = {!! json_encode($heatmapKunjunganPoints ?? []) !!};
             const wisataData = {!! json_encode($wisata) !!};
             let geojsonData = null;
             let currentGeoJsonLayerBatas = null;
-            let currentGeoJsonLayerHeatmap = null;
+            let heatmapLayer = null;
             
             const detailBaseUrl = @json(url('/detail'));
 
@@ -213,14 +249,6 @@
 
             function canonical(name) {
                 return (name || '').toLowerCase().trim();
-            }
-
-            function getColorByJumlahWisata(v) {
-                if (v >= 11) return '#a50f15'; // Sangat padat (>10)
-                if (v === 10) return '#de2d26'; // Padat (10)
-                if (v >= 5 && v <= 9) return '#fb6a4a'; // Sedang (5-9)
-                if (v >= 1 && v <= 4) return '#fcae91'; // Sedikit (1-4)
-                return '#fee5d9'; // Kosong (0)
             }
 
             function escapeHtml(value) {
@@ -281,7 +309,7 @@
 
             const overlayMapsConfig = {
                 "Semua Batas Kecamatan": batasKecamatanGroup,
-                "Heatmap Jumlah Wisata": heatmapGroup,
+                "Peta Kunjungan (Heatmap)": heatmapGroup,
                 "Sebaran Lokasi Wisata": wisataLayerGroup
             };
 
@@ -307,14 +335,14 @@
                 }
                 html += `</div>`;
 
-                html += `<div class="legend-section-title">Heatmap Jumlah Wisata</div>`;
+                html += `<div class="legend-section-title">Peta Kunjungan (Heatmap)</div>`;
                 html += `<div class="legend-grid" style="grid-template-columns: 1fr;">`;
                 const heatmaps = [
-                    { label: '0 Wisata', color: '#fee5d9' },
-                    { label: '1 - 4 Wisata', color: '#fcae91' },
-                    { label: '5 - 9 Wisata', color: '#fb6a4a' },
-                    { label: '10 Wisata', color: '#de2d26' },
-                    { label: '11 - 17 Wisata', color: '#a50f15' }
+                    { label: '0 Kunjungan', color: '#fee5d9' },
+                    { label: '1 - 5.000 Kunjungan', color: '#fcae91' },
+                    { label: '5.001 - 10.000 Kunjungan', color: '#fb6a4a' },
+                    { label: '10.001 - 25.000 Kunjungan', color: '#de2d26' },
+                    { label: '> 25.000 Kunjungan', color: '#a50f15' }
                 ];
                 heatmaps.forEach(h => {
                     html += `<div class="legend-item"><div class="legend-color" style="background-color: ${h.color}; opacity: 0.9;"></div>${h.label}</div>`;
@@ -335,15 +363,38 @@
             const searchInput = document.getElementById('searchInput');
             const katSelect = document.getElementById('kategoriSelect');
             const kecSelect = document.getElementById('kecamatanSelect');
+            const bulanSelect = document.getElementById('bulanSelect');
+            const tahunSelect = document.getElementById('tahunSelect');
             const wisataCountEl = document.getElementById('wisataCount');
             const resetBtn = document.getElementById('resetFilterBtn');
+
+            async function fetchHeatmapData() {
+                const bulan = bulanSelect.value;
+                const tahun = tahunSelect.value;
+                
+                try {
+                    const [kecamatanResponse, pointsResponse] = await Promise.all([
+                        fetch(`/api/kunjungan/heatmap?bulan=${bulan}&tahun=${tahun}`),
+                        fetch(`/api/kunjungan/heatmap-points?bulan=${bulan}&tahun=${tahun}`)
+                    ]);
+                    
+                    jumlahKunjunganPerKecamatan = await kecamatanResponse.json();
+                    heatmapKunjunganPoints = await pointsResponse.json();
+                    renderGeoJsonLayers();
+                    renderHeatmapLayer();
+                } catch (error) {
+                    console.error('Error fetching heatmap data:', error);
+                }
+            }
+
+            bulanSelect.addEventListener('change', fetchHeatmapData);
+            tahunSelect.addEventListener('change', fetchHeatmapData);
 
             function renderGeoJsonLayers() {
                 if (!geojsonData) return;
                 
                 // Bersihkan layer sebelumnya
                 batasKecamatanGroup.clearLayers();
-                heatmapGroup.clearLayers();
 
                 const selectedFilterKec = canonical(kecSelect.value);
 
@@ -362,13 +413,13 @@
                             weight: isSelected ? 2 : 1,
                             opacity: isSelected ? 0.9 : 0.4,
                             fillColor: kecamatanColors[nameUpper] || '#95A5A6',
-                            fillOpacity: isSelected ? 0.5 : 0.1
+                            fillOpacity: isSelected ? 0.22 : 0.04
                         };
                     },
                     onEachFeature: function (feature, layer) {
                         const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
-                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
-                        layer.bindPopup(`<div style="text-align:center;"><strong>Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:12px;color:#6b7280;">Jumlah Wisata: ${visits}</span></div>`);
+                        const visits = jumlahKunjunganPerKecamatan[nameUpper] || 0;
+                        layer.bindPopup(`<div style="text-align:center;"><strong>Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:12px;color:#6b7280;">Jumlah Kunjungan: ${new Intl.NumberFormat('id-ID').format(visits)}</span></div>`);
                         
                         // Efek Hover
                         layer.on('mouseover', () => {
@@ -379,37 +430,43 @@
                         });
                     }
                 }).addTo(batasKecamatanGroup);
+            }
 
-                // --- 2. Heatmap Layer ---
-                currentGeoJsonLayerHeatmap = L.geoJSON(geojsonData, {
-                    coordsToLatLng: coordsToLatLng,
-                    style: function (feature) {
-                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
-                        const nameCanon = canonical(feature.properties.NAMOBJ);
-                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
-                        
-                        const isSelected = selectedFilterKec === 'all' || selectedFilterKec === nameCanon;
+            function renderHeatmapLayer() {
+                heatmapGroup.clearLayers();
 
-                        return {
-                            color: '#1f2937', // Border warna gelap agar jelas
-                            weight: isSelected ? 1.5 : 0.5,
-                            opacity: isSelected ? 0.8 : 0.3,
-                            fillColor: getColorByJumlahWisata(visits),
-                            fillOpacity: isSelected ? 0.85 : 0.2
-                        };
-                    },
-                    onEachFeature: function (feature, layer) {
-                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
-                        const visits = jumlahWisataPerKecamatan[nameUpper] || 0;
-                        layer.bindPopup(`<div style="text-align:center;color:#ef4444;"><strong>🔥 Heatmap Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:13px;font-weight:bold;color:#4b5563;">Jumlah Wisata: ${visits}</span></div>`);
-                        
-                        // Efek Hover
-                        layer.on('mouseover', () => {
-                            layer.setStyle({ weight: 3, fillOpacity: 0.95 });
-                        });
-                        layer.on('mouseout', () => {
-                            currentGeoJsonLayerHeatmap.resetStyle(layer);
-                        });
+                const keyword = canonical(searchInput.value);
+                const valKat = katSelect.value;
+                const valKec = canonical(kecSelect.value);
+                const maxTotal = Math.max(...heatmapKunjunganPoints.map(item => Number(item.total || 0)), 1);
+                const heatData = heatmapKunjunganPoints
+                    .filter(item => {
+                        const lat = Number(item.latitude);
+                        const lng = Number(item.longitude);
+                        const total = Number(item.total || 0);
+                        const matchKec = valKec === 'all' || canonical(item.kecamatan) === valKec;
+                        const matchKat = valKat === 'all' || item.kategori === valKat;
+                        const matchKey = keyword === '' || canonical(item.nama).includes(keyword);
+
+                        return Number.isFinite(lat) && Number.isFinite(lng) && total > 0 && matchKec && matchKat && matchKey;
+                    })
+                    .map(item => [
+                        Number(item.latitude),
+                        Number(item.longitude),
+                        Math.max(Number(item.total || 0) / maxTotal, 0.15)
+                    ]);
+
+                heatmapLayer = L.heatLayer(heatData, {
+                    pane: 'heatmapPane',
+                    radius: 46,
+                    blur: 32,
+                    maxZoom: 14,
+                    minOpacity: 0.45,
+                    gradient: {
+                        0.18: '#fef08a',
+                        0.4: '#fb923c',
+                        0.68: '#ef4444',
+                        1: '#7f1d1d'
                     }
                 }).addTo(heatmapGroup);
             }
@@ -447,6 +504,7 @@
                 
                 // Menata ulang style/highlight GeoJSON berdasarkan kecamatan yang di-filter
                 renderGeoJsonLayers();
+                renderHeatmapLayer();
             }
 
             // Inisialisasi Titik Wisata Marker
@@ -490,7 +548,10 @@
                 searchInput.value = '';
                 katSelect.value = 'all';
                 kecSelect.value = 'all';
+                bulanSelect.value = 'all';
+                tahunSelect.value = 'all';
                 applyFilters();
+                fetchHeatmapData();
                 
                 // Jika ingin mereset tampilan zoom juga
                 if (currentGeoJsonLayerBatas) {

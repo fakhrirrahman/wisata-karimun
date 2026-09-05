@@ -36,29 +36,30 @@ class WisataKunjunganController extends Controller
     public function store(\Illuminate\Http\Request $request)
     {
         $request->validate([
-            'wisata_id' => 'required|exists:wisata,id',
+            'wisata_id' => 'nullable|exists:wisata,id',
             'tahun' => 'required|integer|min:2000|max:' . date('Y'),
-            'bulan' => 'required|integer|min:1|max:12',
+            'bulan' => 'nullable|integer|min:1|max:12',
             'jumlah_kunjungan' => 'required|integer|min:1|max:10000',
         ]);
 
-        $wisata = Wisata::findOrFail($request->wisata_id);
+        $wisata = $request->filled('wisata_id') ? Wisata::findOrFail($request->wisata_id) : null;
         
         $jumlah = $request->jumlah_kunjungan;
         $tahun = $request->tahun;
-        $bulan = $request->bulan;
+        $bulan = $request->filled('bulan') ? (int) $request->bulan : null;
         
         $visits = [];
         
         for ($i = 0; $i < $jumlah; $i++) {
-            $daysInMonth = \Carbon\Carbon::createFromDate($tahun, $bulan)->daysInMonth;
+            $visitMonth = $bulan ?? rand(1, $tahun == date('Y') ? date('n') : 12);
+            $daysInMonth = \Carbon\Carbon::createFromDate($tahun, $visitMonth)->daysInMonth;
             // Generate valid random date up to current date if it's the current year and month
             $currentYear = date('Y');
             $currentMonth = date('n');
             $currentDay = date('j');
             
             $maxDay = $daysInMonth;
-            if ($tahun == $currentYear && $bulan == $currentMonth) {
+            if ($tahun == $currentYear && $visitMonth == $currentMonth) {
                 $maxDay = $currentDay;
             }
             
@@ -67,7 +68,7 @@ class WisataKunjunganController extends Controller
             $randomMinute = rand(0, 59);
             $randomSecond = rand(0, 59);
             
-            $visitedAt = \Carbon\Carbon::create($tahun, $bulan, $randomDay, $randomHour, $randomMinute, $randomSecond);
+            $visitedAt = \Carbon\Carbon::create($tahun, $visitMonth, $randomDay, $randomHour, $randomMinute, $randomSecond);
             
             // Prevent future dates
             if ($visitedAt->isFuture()) {
@@ -75,7 +76,7 @@ class WisataKunjunganController extends Controller
             }
             
             $visits[] = [
-                'wisata_id' => $wisata->id,
+                'wisata_id' => $wisata?->id,
                 'user_id' => null,
                 'ip_address' => '127.0.0.1', // Manual entry
                 'visited_at' => $visitedAt,
@@ -92,20 +93,26 @@ class WisataKunjunganController extends Controller
             WisataVisit::insert($visits);
         }
         
-        // Update aggregated visits count
-        $wisata->increment('visits', $jumlah);
-        
-        // Update last_visited_at
-        $latestVisitDate = \Carbon\Carbon::create($tahun, $bulan)->endOfMonth();
-        if ($latestVisitDate->isFuture()) {
-            $latestVisitDate = now();
+        if ($wisata) {
+            // Update aggregated visits count hanya untuk data yang punya lokasi wisata.
+            $wisata->increment('visits', $jumlah);
+            
+            // Update last_visited_at
+            $latestVisitDate = $bulan
+                ? \Carbon\Carbon::create($tahun, $bulan)->endOfMonth()
+                : \Carbon\Carbon::create($tahun, 12)->endOfYear();
+            if ($latestVisitDate->isFuture()) {
+                $latestVisitDate = now();
+            }
+            
+            if (!$wisata->last_visited_at || $latestVisitDate->greaterThan($wisata->last_visited_at)) {
+                $wisata->update(['last_visited_at' => $latestVisitDate]);
+            }
         }
         
-        if (!$wisata->last_visited_at || $latestVisitDate->greaterThan($wisata->last_visited_at)) {
-            $wisata->update(['last_visited_at' => $latestVisitDate]);
-        }
-        
-        return redirect()->route('kunjungan.index')->with('success', 'Data kunjungan berhasil ditambahkan.');
+        return redirect()->route('kunjungan.index')->with('success', $wisata
+            ? 'Data kunjungan per wisata berhasil ditambahkan.'
+            : 'Data kunjungan agregat berhasil ditambahkan.');
     }
 
     /**

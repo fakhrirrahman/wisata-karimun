@@ -126,35 +126,15 @@ class PublicWisataController extends Controller
         
         $wisata = $query->get();
 
-        // Hitung total wisata per kecamatan langsung dari database
-        $jumlahWisataPerKecamatan = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, count(*) as total')
-            ->groupBy('kecamatan')
-            ->pluck('total', 'kec')
-            ->toArray();
-
-        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahWisataPerKecamatan'));
-    }
-
-    public function petaKunjungan(Request $request)
-    {
-        $selectedKecamatans = $request->input('kecamatan', []);
-        
-        // Filter wisata berdasarkan kecamatan jika ada yang dipilih
-        $query = Wisata::query();
-        
-        if (!empty($selectedKecamatans) && !in_array('all', $selectedKecamatans)) {
-            $query->whereIn('kecamatan', $selectedKecamatans);
-        }
-        
-        $wisata = $query->get();
-
-        // Hitung total kunjungan per kecamatan langsung dari database
+        // Hitung total kunjungan per kecamatan langsung dari database untuk popup batas.
         $jumlahKunjunganPerKecamatan = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, sum(visits) as total')
             ->groupBy('kecamatan')
             ->pluck('total', 'kec')
             ->toArray();
 
-        return view('public.peta-kunjungan', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan'));
+        $heatmapKunjunganPoints = $this->getHeatmapKunjunganPoints();
+
+        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan', 'heatmapKunjunganPoints'));
     }
 
     public function apiGetAllWisata()
@@ -192,5 +172,53 @@ class PublicWisataController extends Controller
         }
 
         return response()->json($data);
+    }
+
+    public function apiGetHeatmapKunjunganPoints(Request $request)
+    {
+        return response()->json($this->getHeatmapKunjunganPoints(
+            $request->input('bulan', 'all'),
+            $request->input('tahun', 'all')
+        ));
+    }
+
+    private function getHeatmapKunjunganPoints(string $bulan = 'all', string $tahun = 'all')
+    {
+        if ($bulan === 'all' && $tahun === 'all') {
+            return Wisata::select('id', 'nama', 'kategori', 'kecamatan', 'latitude', 'longitude')
+                ->selectRaw('visits as total')
+                ->whereNotNull('latitude')
+                ->whereNotNull('longitude')
+                ->where('latitude', '!=', '')
+                ->where('longitude', '!=', '')
+                ->get();
+        }
+
+        $visitQuery = Wisata::leftJoin('wisata_visits', 'wisata.id', '=', 'wisata_visits.wisata_id')
+            ->select(
+                'wisata.id',
+                'wisata.nama',
+                'wisata.kategori',
+                'wisata.kecamatan',
+                'wisata.latitude',
+                'wisata.longitude'
+            )
+            ->whereNotNull('wisata.latitude')
+            ->whereNotNull('wisata.longitude')
+            ->where('wisata.latitude', '!=', '')
+            ->where('wisata.longitude', '!=', '');
+
+        if ($bulan !== 'all') {
+            $visitQuery->whereMonth('wisata_visits.visited_at', $bulan);
+        }
+
+        if ($tahun !== 'all') {
+            $visitQuery->whereYear('wisata_visits.visited_at', $tahun);
+        }
+
+        return $visitQuery
+            ->selectRaw('count(wisata_visits.id) as total')
+            ->groupBy('wisata.id', 'wisata.nama', 'wisata.kategori', 'wisata.kecamatan', 'wisata.latitude', 'wisata.longitude')
+            ->get();
     }
 }

@@ -11,30 +11,30 @@
         <div class="grid grid-cols-2 gap-6">
             <!-- Pilih Wisata -->
             <div class="col-span-2">
-                <label for="wisata_id" class="block text-sm font-medium text-gray-700 mb-2">Pilih Wisata *</label>
+                <label for="wisata_id" class="block text-sm font-medium text-gray-700 mb-2">Pilih Wisata <span class="text-gray-400 font-normal">(opsional)</span></label>
                 <select 
                     id="wisata_id" 
                     name="wisata_id"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none @error('wisata_id') border-red-500 @enderror"
-                    required
                 >
-                    <option value="">Pilih Tempat Wisata</option>
+                    <option value="">Data agregat / tidak spesifik wisata</option>
                     @foreach($wisata as $w)
                         <option value="{{ $w->id }}" {{ old('wisata_id') == $w->id ? 'selected' : '' }}>{{ $w->nama }}</option>
                     @endforeach
                 </select>
                 @error('wisata_id')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Kosongkan jika data hanya tersedia sebagai total kunjungan umum dan tidak punya rincian lokasi wisata.</p>
             </div>
 
             <!-- Bulan -->
             <div>
-                <label for="bulan" class="block text-sm font-medium text-gray-700 mb-2">Bulan *</label>
+                <label for="bulan" class="block text-sm font-medium text-gray-700 mb-2">Bulan <span class="text-gray-400 font-normal">(opsional)</span></label>
                 <select 
                     id="bulan" 
                     name="bulan"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none @error('bulan') border-red-500 @enderror"
-                    required
                 >
+                    <option value="">Data Tahunan</option>
                     @php
                         $bulans = [
                             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -43,10 +43,11 @@
                         ];
                     @endphp
                     @foreach($bulans as $num => $name)
-                        <option value="{{ $num }}" {{ old('bulan', date('n')) == $num ? 'selected' : '' }}>{{ $name }}</option>
+                        <option value="{{ $num }}" {{ old('bulan') == $num ? 'selected' : '' }}>{{ $name }}</option>
                     @endforeach
                 </select>
                 @error('bulan')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Pilih bulan untuk data bulanan 2025-2026, atau kosongkan untuk data tahunan.</p>
             </div>
 
             <!-- Tahun -->
@@ -78,7 +79,7 @@
                     required
                 >
                 @error('jumlah_kunjungan')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Data akan di-generate secara acak pada bulan dan tahun yang dipilih sebanyak jumlah yang Anda masukkan.</p>
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Jika wisata dipilih, data masuk ke kunjungan lokasi wisata dan dapat muncul di heatmap. Jika wisata dikosongkan, data hanya menjadi agregat periode.</p>
             </div>
         </div>
 
@@ -141,7 +142,7 @@
 <script>
     $(document).ready(function() {
         $('#wisata_id').select2({
-            placeholder: "Pilih Tempat Wisata",
+            placeholder: "Data agregat / tidak spesifik wisata",
             allowClear: true,
             width: '100%'
         });

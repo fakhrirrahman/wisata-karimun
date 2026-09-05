@@ -53,29 +53,14 @@
     </div>
 </div>
 
-<!-- Chart Wisata Harian -->
+<!-- Chart Wisata Bulanan -->
 <div class="bg-white rounded-lg shadow p-6 mb-4">
     <div class="flex justify-between items-center mb-4">
         <h3 class="text-lg font-semibold text-gray-800">
-            <i class="fas fa-calendar-day text-purple-500 mr-2"></i>
-            Kunjungan Wisata Harian
+            <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+            Kunjungan Wisata Bulanan
         </h3>
         <div class="flex items-center space-x-3">
-            <div class="flex items-center space-x-2">
-                <label for="bulanFilter" class="text-sm text-gray-600 font-medium">Bulan:</label>
-                <select id="bulanFilter" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    @php
-                        $namaBulans = [
-                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                        ];
-                    @endphp
-                    @foreach($namaBulans as $num => $name)
-                        <option value="{{ $num }}" {{ $num == date('n') ? 'selected' : '' }}>{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
             <div class="flex items-center space-x-2">
                 <label for="tahunFilter" class="text-sm text-gray-600 font-medium">Tahun:</label>
                 <select id="tahunFilter" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -87,7 +72,7 @@
         </div>
     </div>
     <div style="height: 350px; max-height: 350px;">
-        <canvas id="wisataHarianChart"></canvas>
+        <canvas id="wisataBulananChart"></canvas>
     </div>
 </div>
 
@@ -294,28 +279,28 @@
         }
     });
 
-    // Chart Wisata Harian
-    const wisataHarianCtx = document.getElementById('wisataHarianChart').getContext('2d');
-    let wisataHarianChart = null;
+    // Chart Wisata Bulanan
+    const wisataBulananCtx = document.getElementById('wisataBulananChart').getContext('2d');
+    let wisataBulananChart = null;
 
-    // Function untuk load data per hari
-    function loadWisataPerHari(tahun, bulan) {
-        fetch(`/dashboard/wisata-per-hari?tahun=${tahun}&bulan=${bulan}`)
+    // Function untuk load data per bulan
+    function loadWisataPerBulan(tahun) {
+        fetch(`/dashboard/wisata-per-bulan?tahun=${tahun}`)
             .then(response => response.json())
             .then(result => {
                 const data = result.data;
                 const details = result.details;
                 
-                const labels = data.map(item => item.hari);
+                const labels = data.map(item => item.nama_bulan);
                 const totals = data.map(item => item.total);
 
                 // Destroy chart lama jika ada
-                if (wisataHarianChart) {
-                    wisataHarianChart.destroy();
+                if (wisataBulananChart) {
+                    wisataBulananChart.destroy();
                 }
 
                 // Buat chart baru
-                wisataHarianChart = new Chart(wisataHarianCtx, {
+                wisataBulananChart = new Chart(wisataBulananCtx, {
                     type: 'line',
                     data: {
                         labels: labels,
@@ -354,15 +339,14 @@
                                 bodySpacing: 6,
                                 callbacks: {
                                     title: function(context) {
-                                        const bulanName = document.getElementById('bulanFilter').options[document.getElementById('bulanFilter').selectedIndex].text;
-                                        return context[0].label + ' ' + bulanName + ' ' + tahun;
+                                        return context[0].label + ' ' + tahun;
                                     },
                                     label: function(context) {
                                         return 'Total Kunjungan: ' + context.parsed.y.toLocaleString();
                                     },
                                     afterLabel: function(context) {
-                                        const hari = context.label;
-                                        const wisataDetails = details[hari];
+                                        const bulan = data[context.dataIndex].bulan;
+                                        const wisataDetails = details[bulan];
                                         
                                         if (wisataDetails && wisataDetails.length > 0) {
                                             let lines = ['\nTop 5 Wisata:'];
@@ -408,20 +392,13 @@
             });
     }
 
-    // Load data tahun dan bulan saat ini saat halaman pertama kali dimuat
+    // Load data tahun saat ini saat halaman pertama kali dimuat
     const currentYearVal = document.getElementById('tahunFilter').value;
-    const currentMonthVal = document.getElementById('bulanFilter').value;
-    loadWisataPerHari(currentYearVal, currentMonthVal);
+    loadWisataPerBulan(currentYearVal);
 
-    // Event listener untuk filter tahun dan bulan
+    // Event listener untuk filter tahun
     document.getElementById('tahunFilter').addEventListener('change', function() {
-        const bulan = document.getElementById('bulanFilter').value;
-        loadWisataPerHari(this.value, bulan);
-    });
-
-    document.getElementById('bulanFilter').addEventListener('change', function() {
-        const tahun = document.getElementById('tahunFilter').value;
-        loadWisataPerHari(tahun, this.value);
+        loadWisataPerBulan(this.value);
     });
 </script>
 @endpush

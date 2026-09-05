@@ -14,8 +14,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [PublicWisataController::class, 'index'])->name('beranda');
 Route::get('/detail/{id}', [PublicWisataController::class, 'detail'])->name('detail');
 Route::get('/peta', [PublicWisataController::class, 'peta'])->name('peta');
-Route::get('/peta-kunjungan', [PublicWisataController::class, 'petaKunjungan'])->name('peta-kunjungan');
 Route::get('/api/kunjungan/heatmap', [PublicWisataController::class, 'apiGetHeatmapKunjungan'])->name('api.kunjungan.heatmap');
+Route::get('/api/kunjungan/heatmap-points', [PublicWisataController::class, 'apiGetHeatmapKunjunganPoints'])->name('api.kunjungan.heatmap-points');
 Route::get('/api/wisata/all', [PublicWisataController::class, 'apiGetAllWisata'])->name('api.wisata.all');
 Route::post('/ulasan', [PublicWisataController::class, 'storeUlasan'])->name('ulasan.store');
 
@@ -25,7 +25,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::middleware('auth')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/wisata-per-hari', [DashboardController::class, 'getWisataPerHari'])->name('dashboard.wisata-per-hari');
+    Route::get('/dashboard/wisata-per-bulan', [DashboardController::class, 'getWisataPerBulan'])->name('dashboard.wisata-per-bulan');
 
     // Wisata Management
     Route::prefix('datawisata')->name('datawisata.')->group(function () {
@@ -66,5 +66,3 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
-
-

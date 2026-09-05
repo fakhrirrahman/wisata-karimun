@@ -24,8 +24,8 @@ class DashboardController extends Controller
         // Total ulasan dari semua wisata
         $totalUlasan = (int) WisataReview::count();
 
-        // Total kunjungan dari kolom agregat wisata
-        $totalKunjungan = (int) Wisata::sum('visits');
+        // Total kunjungan dari wisata ditambah data agregat yang tidak punya lokasi wisata.
+        $totalKunjungan = (int) Wisata::sum('visits') + (int) WisataVisit::whereNull('wisata_id')->count();
 
         // Data untuk chart kunjungan wisata per tahun
         $wisataPerTahun = WisataVisit::selectRaw('YEAR(visited_at) as tahun, COUNT(*) as total')
@@ -44,7 +44,7 @@ class DashboardController extends Controller
             ->map(function ($items) {
                 return $items->take(5)->map(function ($item) {
                     return [
-                        'nama' => $item->wisata->nama ?? 'N/A',
+                        'nama' => $item->wisata->nama ?? 'Data agregat',
                         'jumlah' => $item->jumlah
                     ];
                 });
@@ -63,6 +63,7 @@ class DashboardController extends Controller
 
         // Data kunjungan per wisata (top 10 wisata dengan kunjungan terbanyak)
         $kunjunganPerWisata = WisataVisit::selectRaw('wisata_id, COUNT(*) as total_kunjungan')
+            ->whereNotNull('wisata_id')
             ->groupBy('wisata_id')
             ->orderBy('total_kunjungan', 'desc')
             ->limit(10)
@@ -72,51 +73,62 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('wisataData', 'kategoriCount', 'totalUlasan', 'totalKunjungan', 'wisataPerTahun', 'tahunTersedia', 'kunjunganPerWisata', 'wisataDetailPerTahun'));
     }
 
-    // Method untuk mendapatkan data kunjungan wisata per hari berdasarkan bulan dan tahun (untuk AJAX)
-    public function getWisataPerHari(Request $request)
+    // Method untuk mendapatkan data kunjungan wisata per bulan berdasarkan tahun (untuk AJAX)
+    public function getWisataPerBulan(Request $request)
     {
         $tahun = $request->get('tahun', date('Y'));
-        $bulan = $request->get('bulan', date('n'));
 
-        $wisataPerHariRaw = WisataVisit::selectRaw('DAY(visited_at) as hari, COUNT(*) as total')
+        $wisataPerBulanRaw = WisataVisit::selectRaw('MONTH(visited_at) as bulan, COUNT(*) as total')
             ->whereYear('visited_at', $tahun)
-            ->whereMonth('visited_at', $bulan)
-            ->groupBy('hari')
-            ->pluck('total', 'hari')
+            ->groupBy('bulan')
+            ->pluck('total', 'bulan')
             ->toArray();
 
-        $daysInMonth = \Carbon\Carbon::createFromDate($tahun, $bulan)->daysInMonth;
+        $namaBulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
 
-        $wisataPerHari = [];
-        for ($i = 1; $i <= $daysInMonth; $i++) {
-            $wisataPerHari[] = [
-                'hari' => $i,
-                'total' => $wisataPerHariRaw[$i] ?? 0
+        $wisataPerBulan = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $wisataPerBulan[] = [
+                'bulan' => $i,
+                'nama_bulan' => $namaBulan[$i],
+                'total' => $wisataPerBulanRaw[$i] ?? 0
             ];
         }
 
-        // Detail wisata per hari
-        $wisataDetailPerHari = WisataVisit::selectRaw('DAY(visited_at) as hari, wisata_id, COUNT(*) as jumlah')
+        // Detail wisata per bulan
+        $wisataDetailPerBulan = WisataVisit::selectRaw('MONTH(visited_at) as bulan, wisata_id, COUNT(*) as jumlah')
             ->whereYear('visited_at', $tahun)
-            ->whereMonth('visited_at', $bulan)
             ->with('wisata:id,nama')
-            ->groupBy('hari', 'wisata_id')
-            ->orderBy('hari', 'asc')
+            ->groupBy('bulan', 'wisata_id')
+            ->orderBy('bulan', 'asc')
             ->orderBy('jumlah', 'desc')
             ->get()
-            ->groupBy('hari')
+            ->groupBy('bulan')
             ->map(function ($items) {
                 return $items->take(5)->map(function ($item) {
                     return [
-                        'nama' => $item->wisata->nama ?? 'N/A',
+                        'nama' => $item->wisata->nama ?? 'Data agregat',
                         'jumlah' => $item->jumlah
                     ];
                 });
             });
 
         return response()->json([
-            'data' => $wisataPerHari,
-            'details' => $wisataDetailPerHari
+            'data' => $wisataPerBulan,
+            'details' => $wisataDetailPerBulan
         ]);
     }
 }
