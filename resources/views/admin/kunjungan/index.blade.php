@@ -8,7 +8,7 @@
     <div class="flex justify-between items-center mb-6">
         <h3 class="text-2xl font-bold text-gray-800">Statistik Kunjungan Wisata</h3>
         <div class="flex space-x-3">
-            <a href="{{ route('kunjungan.create') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition flex items-center">
+            <a href="{{ route('kunjungan.create') }}" class="inline-flex items-center px-4 py-2 rounded-lg transition text-white font-medium shadow-sm" style="background-color: #2563eb;">
                 <i class="fas fa-plus mr-2"></i> Tambah Data Kunjungan
             </a>
             <a href="{{ route('kunjungan.statistik') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition flex items-center">
