@@ -132,9 +132,14 @@ class PublicWisataController extends Controller
             ->pluck('total', 'kec')
             ->toArray();
 
+        $jumlahWisataPerKecamatan = \App\Models\Wisata::selectRaw('UPPER(kecamatan) as kec, count(id) as total')
+            ->groupBy('kecamatan')
+            ->pluck('total', 'kec')
+            ->toArray();
+
         $heatmapKunjunganPoints = $this->getHeatmapKunjunganPoints();
 
-        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan', 'heatmapKunjunganPoints'));
+        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan', 'jumlahWisataPerKecamatan', 'heatmapKunjunganPoints'));
     }
 
     public function apiGetAllWisata()

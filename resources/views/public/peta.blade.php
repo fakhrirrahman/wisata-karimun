@@ -213,10 +213,12 @@
             /* ================== STATE & LAYERS ================== */
             const wisataLayerGroup = L.layerGroup().addTo(map);
             const batasKecamatanGroup = L.layerGroup().addTo(map); // Menyala by default
-            const heatmapGroup = L.layerGroup().addTo(map); // Heatmap kunjungan tampil default
+            const heatmapDataKunjunganGroup = L.layerGroup(); // Heatmap kunjungan tidak tampil default
+            const heatmapJumlahWisataGroup = L.layerGroup(); // Heatmap jumlah wisata tidak tampil default
             
             let markerMap = {};
             let jumlahKunjunganPerKecamatan = {!! json_encode($jumlahKunjunganPerKecamatan ?? []) !!};
+            let jumlahWisataPerKecamatan = {!! json_encode($jumlahWisataPerKecamatan ?? []) !!};
             let heatmapKunjunganPoints = {!! json_encode($heatmapKunjunganPoints ?? []) !!};
             const wisataData = {!! json_encode($wisata) !!};
             let geojsonData = null;
@@ -246,6 +248,15 @@
                 'MORO': '#BB8FCE',
                 'TEBING': '#85C1E2'
             };
+
+            function getColorByJumlahWisata(d) {
+                return d > 20 ? '#800026' :
+                       d > 10 ? '#BD0026' :
+                       d > 5  ? '#E31A1C' :
+                       d > 2  ? '#FC4E2A' :
+                       d > 0  ? '#FD8D3C' :
+                                '#FFEDA0';
+            }
 
             function canonical(name) {
                 return (name || '').toLowerCase().trim();
@@ -308,8 +319,9 @@
             };
 
             const overlayMapsConfig = {
-                "Semua Batas Kecamatan": batasKecamatanGroup,
-                "Peta Kunjungan (Heatmap)": heatmapGroup,
+                "Batas Kecamatan": batasKecamatanGroup,
+                "Heatmap Jumlah Wisata": heatmapJumlahWisataGroup,
+                "Heatmap Data Kunjungan": heatmapDataKunjunganGroup,
                 "Sebaran Lokasi Wisata": wisataLayerGroup
             };
 
@@ -430,10 +442,43 @@
                         });
                     }
                 }).addTo(batasKecamatanGroup);
+
+                // --- 2. Heatmap Jumlah Wisata Layer ---
+                heatmapJumlahWisataGroup.clearLayers();
+                let currentGeoJsonLayerHeatmap = L.geoJSON(geojsonData, {
+                    coordsToLatLng: coordsToLatLng,
+                    style: function (feature) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const nameCanon = canonical(feature.properties.NAMOBJ);
+                        const count = jumlahWisataPerKecamatan[nameUpper] || 0;
+                        
+                        const isSelected = selectedFilterKec === 'all' || selectedFilterKec === nameCanon;
+
+                        return {
+                            color: '#1f2937', 
+                            weight: isSelected ? 1.5 : 0.5,
+                            opacity: isSelected ? 0.8 : 0.3,
+                            fillColor: getColorByJumlahWisata(count),
+                            fillOpacity: isSelected ? 0.85 : 0.2
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
+                        const count = jumlahWisataPerKecamatan[nameUpper] || 0;
+                        layer.bindPopup(`<div style="text-align:center;color:#ef4444;"><strong>🔥 Heatmap Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:13px;font-weight:bold;color:#4b5563;">Jumlah Wisata: ${count}</span></div>`);
+                        
+                        layer.on('mouseover', () => {
+                            layer.setStyle({ weight: 3, fillOpacity: 0.95 });
+                        });
+                        layer.on('mouseout', () => {
+                            currentGeoJsonLayerHeatmap.resetStyle(layer);
+                        });
+                    }
+                }).addTo(heatmapJumlahWisataGroup);
             }
 
             function renderHeatmapLayer() {
-                heatmapGroup.clearLayers();
+                heatmapDataKunjunganGroup.clearLayers();
 
                 const keyword = canonical(searchInput.value);
                 const valKat = katSelect.value;
@@ -468,7 +513,7 @@
                         0.68: '#ef4444',
                         1: '#7f1d1d'
                     }
-                }).addTo(heatmapGroup);
+                }).addTo(heatmapDataKunjunganGroup);
             }
 
             function applyFilters() {
