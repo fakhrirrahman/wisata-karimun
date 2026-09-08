@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Wisata;
+use App\Models\WisataAnnualVisit;
 use App\Models\WisataVisit;
 use App\Models\WisataReview;
 
@@ -137,9 +138,16 @@ class PublicWisataController extends Controller
             ->pluck('total', 'kec')
             ->toArray();
 
-        $heatmapKunjunganPoints = $this->getHeatmapKunjunganPoints();
+        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan', 'jumlahWisataPerKecamatan'));
+    }
 
-        return view('public.peta', compact('wisata', 'selectedKecamatans', 'jumlahKunjunganPerKecamatan', 'jumlahWisataPerKecamatan', 'heatmapKunjunganPoints'));
+    public function petaKunjungan()
+    {
+        $kunjunganTahunanKarimun = WisataAnnualVisit::orderBy('year')
+            ->pluck('total_visits', 'year')
+            ->toArray();
+
+        return view('public.peta-kunjungan', compact('kunjunganTahunanKarimun'));
     }
 
     public function apiGetAllWisata()

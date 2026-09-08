@@ -43,39 +43,6 @@
                 </select>
             </div>
 
-            <div class="flex-1 min-w-[150px]">
-                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Bulan</label>
-                <select id="bulanSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
-                    <option value="all">Semua Bulan</option>
-                    <option value="1">Januari</option>
-                    <option value="2">Februari</option>
-                    <option value="3">Maret</option>
-                    <option value="4">April</option>
-                    <option value="5">Mei</option>
-                    <option value="6">Juni</option>
-                    <option value="7">Juli</option>
-                    <option value="8">Agustus</option>
-                    <option value="9">September</option>
-                    <option value="10">Oktober</option>
-                    <option value="11">November</option>
-                    <option value="12">Desember</option>
-                </select>
-            </div>
-
-            <div class="flex-1 min-w-[150px]">
-                <label class="block text-xs font-semibold text-gray-600 mb-1 uppercase">Tahun</label>
-                <select id="tahunSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 outline-none text-sm bg-white">
-                    <option value="all">Semua Tahun</option>
-                    @php
-                        $startYear = 2020;
-                        $currentYear = date('Y');
-                    @endphp
-                    @for ($y = $currentYear; $y >= $startYear; $y--)
-                        <option value="{{ $y }}">{{ $y }}</option>
-                    @endfor
-                </select>
-            </div>
-
             <div>
                 <button id="resetFilterBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition text-sm font-semibold h-[38px]">
                     Reset Filter
@@ -85,7 +52,7 @@
 
         <div class="bg-white px-4 py-1.5 border-b shadow-sm flex justify-between items-center text-xs text-gray-600 shrink-0">
             <span>Ditemukan: <strong id="wisataCount" class="text-blue-600">{{ count($wisata) }}</strong> wisata</span>
-            <span class="italic font-medium">Buka panel <strong>Layer</strong> di sudut kanan atas peta untuk mengaktifkan Heatmap.</span>
+            <span class="italic font-medium">Buka panel <strong>Layer</strong> di sudut kanan atas peta untuk mengatur tampilan layer.</span>
         </div>
 
         <!-- Map -->
@@ -213,17 +180,14 @@
             /* ================== STATE & LAYERS ================== */
             const wisataLayerGroup = L.layerGroup().addTo(map);
             const batasKecamatanGroup = L.layerGroup().addTo(map); // Menyala by default
-            const heatmapDataKunjunganGroup = L.layerGroup(); // Heatmap kunjungan tidak tampil default
-            const heatmapJumlahWisataGroup = L.layerGroup(); // Heatmap jumlah wisata tidak tampil default
+            const jumlahWisataGroup = L.layerGroup(); // Jumlah wisata tidak tampil default
             
             let markerMap = {};
             let jumlahKunjunganPerKecamatan = {!! json_encode($jumlahKunjunganPerKecamatan ?? []) !!};
             let jumlahWisataPerKecamatan = {!! json_encode($jumlahWisataPerKecamatan ?? []) !!};
-            let heatmapKunjunganPoints = {!! json_encode($heatmapKunjunganPoints ?? []) !!};
             const wisataData = {!! json_encode($wisata) !!};
             let geojsonData = null;
             let currentGeoJsonLayerBatas = null;
-            let heatmapLayer = null;
             
             const detailBaseUrl = @json(url('/detail'));
 
@@ -249,13 +213,39 @@
                 'TEBING': '#85C1E2'
             };
 
+            const jumlahWisataColorRamp = ['#FEE5D9', '#FC9272', '#FC4E2A', '#E31A1C', '#800026'];
+            const jumlahWisataClasses = buildJumlahWisataClasses();
+
+            function buildJumlahWisataClasses() {
+                const values = Object.values(jumlahWisataPerKecamatan)
+                    .map(value => Number(value || 0))
+                    .filter(value => Number.isFinite(value));
+
+                if (!values.includes(0)) {
+                    values.push(0);
+                }
+
+                const uniqueValues = [...new Set(values)].sort((a, b) => a - b);
+                const classCount = Math.min(jumlahWisataColorRamp.length, uniqueValues.length);
+
+                return Array.from({ length: classCount }, (_, index) => {
+                    const startIndex = Math.floor(index * uniqueValues.length / classCount);
+                    const endIndex = Math.floor((index + 1) * uniqueValues.length / classCount) - 1;
+                    const min = uniqueValues[startIndex];
+                    const max = uniqueValues[endIndex];
+
+                    return {
+                        min,
+                        max,
+                        color: jumlahWisataColorRamp[index],
+                        label: `${min} - ${max} Wisata`
+                    };
+                }).filter(item => item.min !== undefined);
+            }
+
             function getColorByJumlahWisata(d) {
-                return d > 20 ? '#800026' :
-                       d > 10 ? '#BD0026' :
-                       d > 5  ? '#E31A1C' :
-                       d > 2  ? '#FC4E2A' :
-                       d > 0  ? '#FD8D3C' :
-                                '#FFEDA0';
+                const match = jumlahWisataClasses.find(item => d >= item.min && d <= item.max);
+                return match ? match.color : jumlahWisataColorRamp[jumlahWisataColorRamp.length - 1];
             }
 
             function canonical(name) {
@@ -320,9 +310,8 @@
 
             const overlayMapsConfig = {
                 "Batas Kecamatan": batasKecamatanGroup,
-                "Heatmap Jumlah Wisata": heatmapJumlahWisataGroup,
-                "Heatmap Data Kunjungan": heatmapDataKunjunganGroup,
-                "Sebaran Lokasi Wisata": wisataLayerGroup
+                "Sebaran Lokasi Wisata": wisataLayerGroup,
+                "Jumlah Wisata": jumlahWisataGroup
             };
 
             L.control.layers(baseMapsConfig, overlayMapsConfig, { collapsed: false, position: 'topright' }).addTo(map);
@@ -347,17 +336,10 @@
                 }
                 html += `</div>`;
 
-                html += `<div class="legend-section-title">Peta Kunjungan (Heatmap)</div>`;
+                html += `<div class="legend-section-title">Jumlah Wisata</div>`;
                 html += `<div class="legend-grid" style="grid-template-columns: 1fr;">`;
-                const heatmaps = [
-                    { label: '0 Kunjungan', color: '#fee5d9' },
-                    { label: '1 - 5.000 Kunjungan', color: '#fcae91' },
-                    { label: '5.001 - 10.000 Kunjungan', color: '#fb6a4a' },
-                    { label: '10.001 - 25.000 Kunjungan', color: '#de2d26' },
-                    { label: '> 25.000 Kunjungan', color: '#a50f15' }
-                ];
-                heatmaps.forEach(h => {
-                    html += `<div class="legend-item"><div class="legend-color" style="background-color: ${h.color}; opacity: 0.9;"></div>${h.label}</div>`;
+                jumlahWisataClasses.forEach(item => {
+                    html += `<div class="legend-item"><div class="legend-color" style="background-color: ${item.color}; opacity: 0.9;"></div>${item.label}</div>`;
                 });
                 html += `</div>`;
 
@@ -375,32 +357,8 @@
             const searchInput = document.getElementById('searchInput');
             const katSelect = document.getElementById('kategoriSelect');
             const kecSelect = document.getElementById('kecamatanSelect');
-            const bulanSelect = document.getElementById('bulanSelect');
-            const tahunSelect = document.getElementById('tahunSelect');
             const wisataCountEl = document.getElementById('wisataCount');
             const resetBtn = document.getElementById('resetFilterBtn');
-
-            async function fetchHeatmapData() {
-                const bulan = bulanSelect.value;
-                const tahun = tahunSelect.value;
-                
-                try {
-                    const [kecamatanResponse, pointsResponse] = await Promise.all([
-                        fetch(`/api/kunjungan/heatmap?bulan=${bulan}&tahun=${tahun}`),
-                        fetch(`/api/kunjungan/heatmap-points?bulan=${bulan}&tahun=${tahun}`)
-                    ]);
-                    
-                    jumlahKunjunganPerKecamatan = await kecamatanResponse.json();
-                    heatmapKunjunganPoints = await pointsResponse.json();
-                    renderGeoJsonLayers();
-                    renderHeatmapLayer();
-                } catch (error) {
-                    console.error('Error fetching heatmap data:', error);
-                }
-            }
-
-            bulanSelect.addEventListener('change', fetchHeatmapData);
-            tahunSelect.addEventListener('change', fetchHeatmapData);
 
             function renderGeoJsonLayers() {
                 if (!geojsonData) return;
@@ -443,9 +401,9 @@
                     }
                 }).addTo(batasKecamatanGroup);
 
-                // --- 2. Heatmap Jumlah Wisata Layer ---
-                heatmapJumlahWisataGroup.clearLayers();
-                let currentGeoJsonLayerHeatmap = L.geoJSON(geojsonData, {
+                // --- 2. Jumlah Wisata Layer ---
+                jumlahWisataGroup.clearLayers();
+                let currentGeoJsonLayerJumlahWisata = L.geoJSON(geojsonData, {
                     coordsToLatLng: coordsToLatLng,
                     style: function (feature) {
                         const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
@@ -465,55 +423,17 @@
                     onEachFeature: function (feature, layer) {
                         const nameUpper = (feature.properties.NAMOBJ || '').toUpperCase();
                         const count = jumlahWisataPerKecamatan[nameUpper] || 0;
-                        layer.bindPopup(`<div style="text-align:center;color:#ef4444;"><strong>🔥 Heatmap Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:13px;font-weight:bold;color:#4b5563;">Jumlah Wisata: ${count}</span></div>`);
+                        layer.bindPopup(`<div style="text-align:center;color:#ef4444;"><strong>Jumlah Wisata Kec. ${feature.properties.NAMOBJ}</strong><br><span style="font-size:13px;font-weight:bold;color:#4b5563;">${count} wisata</span></div>`);
                         
                         layer.on('mouseover', () => {
                             layer.setStyle({ weight: 3, fillOpacity: 0.95 });
                         });
                         layer.on('mouseout', () => {
-                            currentGeoJsonLayerHeatmap.resetStyle(layer);
+                            currentGeoJsonLayerJumlahWisata.resetStyle(layer);
                         });
                     }
-                }).addTo(heatmapJumlahWisataGroup);
-            }
+                }).addTo(jumlahWisataGroup);
 
-            function renderHeatmapLayer() {
-                heatmapDataKunjunganGroup.clearLayers();
-
-                const keyword = canonical(searchInput.value);
-                const valKat = katSelect.value;
-                const valKec = canonical(kecSelect.value);
-                const maxTotal = Math.max(...heatmapKunjunganPoints.map(item => Number(item.total || 0)), 1);
-                const heatData = heatmapKunjunganPoints
-                    .filter(item => {
-                        const lat = Number(item.latitude);
-                        const lng = Number(item.longitude);
-                        const total = Number(item.total || 0);
-                        const matchKec = valKec === 'all' || canonical(item.kecamatan) === valKec;
-                        const matchKat = valKat === 'all' || item.kategori === valKat;
-                        const matchKey = keyword === '' || canonical(item.nama).includes(keyword);
-
-                        return Number.isFinite(lat) && Number.isFinite(lng) && total > 0 && matchKec && matchKat && matchKey;
-                    })
-                    .map(item => [
-                        Number(item.latitude),
-                        Number(item.longitude),
-                        Math.max(Number(item.total || 0) / maxTotal, 0.15)
-                    ]);
-
-                heatmapLayer = L.heatLayer(heatData, {
-                    pane: 'heatmapPane',
-                    radius: 46,
-                    blur: 32,
-                    maxZoom: 14,
-                    minOpacity: 0.45,
-                    gradient: {
-                        0.18: '#fef08a',
-                        0.4: '#fb923c',
-                        0.68: '#ef4444',
-                        1: '#7f1d1d'
-                    }
-                }).addTo(heatmapDataKunjunganGroup);
             }
 
             function applyFilters() {
@@ -549,7 +469,6 @@
                 
                 // Menata ulang style/highlight GeoJSON berdasarkan kecamatan yang di-filter
                 renderGeoJsonLayers();
-                renderHeatmapLayer();
             }
 
             // Inisialisasi Titik Wisata Marker
@@ -572,7 +491,7 @@
             });
 
             // Pengambilan dan Pemasangan Data GeoJSON
-            fetch('{{ asset('geojson/jml_wisata.geojson') }}?v={{ time() }}')
+            fetch('{{ asset('geojson/karimun.geojson') }}?v={{ time() }}')
                 .then(res => res.json())
                 .then(data => {
                     geojsonData = data;
@@ -593,10 +512,7 @@
                 searchInput.value = '';
                 katSelect.value = 'all';
                 kecSelect.value = 'all';
-                bulanSelect.value = 'all';
-                tahunSelect.value = 'all';
                 applyFilters();
-                fetchHeatmapData();
                 
                 // Jika ingin mereset tampilan zoom juga
                 if (currentGeoJsonLayerBatas) {

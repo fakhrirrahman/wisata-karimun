@@ -23,7 +23,7 @@
                     @endforeach
                 </select>
                 @error('wisata_id')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Kosongkan jika data hanya tersedia sebagai total kunjungan umum dan tidak punya rincian lokasi wisata.</p>
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Kosongkan untuk mengisi total kunjungan tahunan seluruh Karimun pada menu Peta Kunjungan.</p>
             </div>
 
             <!-- Bulan -->
@@ -47,7 +47,7 @@
                     @endforeach
                 </select>
                 @error('bulan')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Pilih bulan untuk data bulanan 2025-2026, atau kosongkan untuk data tahunan.</p>
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Pilih Data Tahunan untuk peta kunjungan seluruh Karimun.</p>
             </div>
 
             <!-- Tahun -->
@@ -73,13 +73,13 @@
                     id="jumlah_kunjungan" 
                     name="jumlah_kunjungan"
                     value="{{ old('jumlah_kunjungan') }}"
-                    min="1" max="10000"
-                    placeholder="Contoh: 150"
+                    min="0" max="1000000"
+                    placeholder="Contoh: 15750"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none @error('jumlah_kunjungan') border-red-500 @enderror"
                     required
                 >
                 @error('jumlah_kunjungan')<p class="text-red-500 text-sm mt-1">{{ $message }}</p>@enderror
-                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Jika wisata dipilih, data masuk ke kunjungan lokasi wisata dan dapat muncul di heatmap. Jika wisata dikosongkan, data hanya menjadi agregat periode.</p>
+                <p class="mt-2 text-sm text-gray-500"><i class="fas fa-info-circle text-blue-500 mr-1"></i> Jika wisata dikosongkan dan bulan Data Tahunan, data dipakai untuk Peta Kunjungan. Jika wisata dipilih, data masuk ke kunjungan lokasi wisata.</p>
             </div>
         </div>
 

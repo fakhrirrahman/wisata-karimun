@@ -35,6 +35,10 @@
                         class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('peta') ? 'text-blue-600 font-bold' : '' }}">
                         Peta
                     </a>
+                    <a href="{{ route('peta.kunjungan') }}"
+                        class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('peta.kunjungan') ? 'text-blue-600 font-bold' : '' }}">
+                        Peta Kunjungan
+                    </a>
                 </div>
 
                 <a href="{{ route('login') }}" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
@@ -49,7 +53,7 @@
         @yield('content')
     </main>
 
-    @unless(request()->routeIs('peta'))
+    @unless(request()->routeIs('peta') || request()->routeIs('peta.kunjungan'))
         <!-- Footer -->
         <footer class="bg-gray-900 text-white mt-12 py-8">
             <div class="max-w-7xl mx-auto px-4">
@@ -63,6 +67,7 @@
                         <ul class="space-y-2 text-gray-400">
                             <li><a href="{{ route('beranda') }}" class="hover:text-white">Beranda</a></li>
                             <li><a href="{{ route('peta') }}" class="hover:text-white">Peta Wisata</a></li>
+                            <li><a href="{{ route('peta.kunjungan') }}" class="hover:text-white">Peta Kunjungan</a></li>
                         </ul>
                     </div>
                     <div>

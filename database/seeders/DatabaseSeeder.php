@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             wisataKunjunganSeeder::class,
+            WisataAnnualVisitSeeder::class,
         ]);
     }
 }

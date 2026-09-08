@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wisata;
+use App\Models\WisataAnnualVisit;
 use App\Models\WisataVisit;
 use Illuminate\Support\Facades\DB;
 
@@ -39,7 +40,7 @@ class WisataKunjunganController extends Controller
             'wisata_id' => 'nullable|exists:wisata,id',
             'tahun' => 'required|integer|min:2000|max:' . date('Y'),
             'bulan' => 'nullable|integer|min:1|max:12',
-            'jumlah_kunjungan' => 'required|integer|min:1|max:10000',
+            'jumlah_kunjungan' => 'required|integer|min:0|max:1000000',
         ]);
 
         $wisata = $request->filled('wisata_id') ? Wisata::findOrFail($request->wisata_id) : null;
@@ -47,6 +48,17 @@ class WisataKunjunganController extends Controller
         $jumlah = $request->jumlah_kunjungan;
         $tahun = $request->tahun;
         $bulan = $request->filled('bulan') ? (int) $request->bulan : null;
+
+        if (!$wisata && !$bulan) {
+            WisataAnnualVisit::updateOrCreate(
+                ['year' => $tahun],
+                ['total_visits' => $jumlah]
+            );
+
+            return redirect()
+                ->route('kunjungan.index')
+                ->with('success', "Data kunjungan tahunan Karimun {$tahun} berhasil disimpan untuk peta kunjungan.");
+        }
         
         $visits = [];
         
