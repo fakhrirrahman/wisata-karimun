@@ -104,9 +104,14 @@
 
             let geojsonData = null;
             let kunjunganLayer = null;
-            const yearColorPalette = [
-                '#F59E0B',
-                '#EF4444',
+            const fixedYearColors = {
+                '2021': '#FFF7BC',
+                '2022': '#FDD049',
+                '2023': '#FD8D3C',
+                '2024': '#D1D5DB',
+                '2025': '#BD0026'
+            };
+            const extraYearColorPalette = [
                 '#8B5CF6',
                 '#0EA5E9',
                 '#10B981',
@@ -127,8 +132,15 @@
             }
 
             function buildYearColors() {
-                return Object.keys(kunjunganTahunanKarimun).reduce((result, year, index) => {
-                    result[year] = yearColorPalette[index % yearColorPalette.length];
+                let extraColorIndex = 0;
+
+                return Object.keys(kunjunganTahunanKarimun).reduce((result, year) => {
+                    if (fixedYearColors[year]) {
+                        result[year] = fixedYearColors[year];
+                    } else {
+                        result[year] = extraYearColorPalette[extraColorIndex % extraYearColorPalette.length];
+                        extraColorIndex++;
+                    }
 
                     return result;
                 }, {});
